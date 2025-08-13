@@ -21,18 +21,26 @@
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = '';
 
-        data.results
-          .filter(match => match.league.id === "22307") // filtr podle league id
-          .forEach(match => {
-            const time = new Date(match.time * 1000).toLocaleString();
-            const league = match.league.name;
-            const home = match.home.name;
-            const away = match.away.name;
+       const HOURS_AHEAD = 6; // počet hodin dopředu
 
-            const li = document.createElement('li');
-            li.textContent = `${time} - ${league}: ${home} vs ${away}`;
-            matchesList.appendChild(li);
-          });
+data.results
+  .filter(match => match.league.id === "22307") // filtr podle ligy
+  .filter(match => {
+    const matchTime = match.time * 1000; // Unix timestamp v ms
+    const now = Date.now();
+    const maxTime = now + HOURS_AHEAD * 60 * 60 * 1000; // čas do X hodin dopředu
+    return matchTime <= maxTime;
+  })
+  .forEach(match => {
+    const time = new Date(match.time * 1000).toLocaleString();
+    const league = match.league.name;
+    const home = match.home.name;
+    const away = match.away.name;
+
+    const li = document.createElement('li');
+    li.textContent = `${time} - ${league}: ${home} vs ${away}`;
+    matchesList.appendChild(li);
+  });
 
       } catch (error) {
         console.error('Chyba při načítání API:', error);
