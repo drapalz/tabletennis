@@ -2,10 +2,10 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Sportovní zápasy 2</title>
+  <title>Sportovní zápasy</title>
 </head>
 <body>
-  <h1>Seznam zápasů 3</h1>
+  <h1>Seznam zápasů (liga 22307)</h1>
   <ul id="matches"></ul>
 
   <script>
@@ -21,16 +21,18 @@
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = '';
 
-        data.results.forEach(match => {
-          const time = new Date(match.time * 1000).toLocaleString();
-          const league = match.league.name;
-          const home = match.home.name;
-          const away = match.away.name;
+        data.results
+          .filter(match => match.league.id === "22307") // filtr podle league id
+          .forEach(match => {
+            const time = new Date(match.time * 1000).toLocaleString();
+            const league = match.league.name;
+            const home = match.home.name;
+            const away = match.away.name;
 
-          const li = document.createElement('li');
-          li.textContent = `${time} - ${league}: ${home} vs ${away}`;
-          matchesList.appendChild(li);
-        });
+            const li = document.createElement('li');
+            li.textContent = `${time} - ${league}: ${home} vs ${away}`;
+            matchesList.appendChild(li);
+          });
 
       } catch (error) {
         console.error('Chyba při načítání API:', error);
