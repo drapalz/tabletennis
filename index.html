@@ -9,18 +9,20 @@
   <ul id="matches"></ul>
 
   <script>
-    const apiUrl = 'https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj';
+    const originalApiUrl = 'https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj';
+    const apiUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(originalApiUrl);
 
     async function fetchMatches() {
       try {
         const response = await fetch(apiUrl);
-        const data = await response.json();
+        const textData = await response.json();
+        const data = JSON.parse(textData.contents);
 
         const matchesList = document.getElementById('matches');
-        matchesList.innerHTML = ''; // vyčistit seznam
+        matchesList.innerHTML = '';
 
         data.results.forEach(match => {
-          const time = new Date(match.time * 1000).toLocaleString(); // převod Unix timestamp
+          const time = new Date(match.time * 1000).toLocaleString();
           const league = match.league.name;
           const home = match.home.name;
           const away = match.away.name;
