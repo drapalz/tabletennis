@@ -5,49 +5,55 @@
   <title>Sportovní zápasy</title>
 </head>
 <body>
-  <h1>Seznam zápasů  6 hodin</h1>
+  <h1>Seznam zápasů budoucích</h1>
   <ul id="matches"></ul>
 
   <script>
-    const originalApiUrl = 'https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj';
-    const apiUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(originalApiUrl);
+    const apiUrl = 'https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj';
+    const leagueIdFilter = 22307;
 
-    async function fetchMatches() {
+    async function fetchAllMatches() {
+      let page = 1;
+      let totalPages = 1;
+      const allMatches = [];
+
+      do {
+        const response = await fetch(`${apiUrl}&page=${page}`);
+        const data = await response.json();
+
+        totalPages = Math.ceil(data.pager.total / data.pager.per_page);
+
+        const filteredMatches = data.results.filter(match => match.league.id == leagueIdFilter);
+        allMatches.push(...filteredMatches);
+
+        page++;
+      } while (page <= totalPages);
+
+      // Seřadíme podle času (od nejbližšího)
+      allMatches.sort((a, b) => a.time - b.time);
+
+      return allMatches;
+    }
+
+    async function displayMatches() {
       try {
-        const response = await fetch(apiUrl);
-        const textData = await response.json();
-        const data = JSON.parse(textData.contents);
-
+        const matches = await fetchAllMatches();
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = '';
 
-       const HOURS_AHEAD = 6; // počet hodin dopředu
+        matches.forEach(match => {
+          const time = new Date(match.time * 1000).toLocaleString();
+          const league = match.league.name;
+          const home = match.home.name;
+          const away = match.away.name;
 
-data.results
-  .filter(match => match.league.id === "22307") // filtr podle ligy
-  .filter(match => {
-    const matchTime = match.time * 1000; // Unix timestamp v ms
-    const now = Date.now();
-    const maxTime = now + HOURS_AHEAD * 60 * 60 * 1000; // čas do X hodin dopředu
-    return matchTime <= maxTime;
-  })
-  .forEach(match => {
-    const time = new Date(match.time * 1000).toLocaleString();
-    const league = match.league.name;
-    const home = match.home.name;
-    const away = match.away.name;
-
-    const li = document.createElement('li');
-    li.textContent = `${time} - ${league}: ${home} vs ${away}`;
-    matchesList.appendChild(li);
-  });
-
+          const li = document.createElement('li');
+          li.textContent = `${time} - ${league}: ${home} vs ${away}`;
+          matchesList.appendChild(li);
+        });
       } catch (error) {
         console.error('Chyba při načítání API:', error);
       }
     }
 
-    fetchMatches();
-  </script>
-</body>
-</html>
+    displayMat
