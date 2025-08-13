@@ -9,7 +9,8 @@
   <ul id="matches"></ul>
 
   <script>
-    const apiUrl = 'https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj';
+    const apiUrl = 'https://api.allorigins.win/raw?url=' +
+               encodeURIComponent('https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj');
     const leagueIdFilter = 22307;
 
     async function fetchAllMatches() {
