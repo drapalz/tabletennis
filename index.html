@@ -5,7 +5,7 @@
   <title>Sportovní zápasy</title>
 </head>
 <body>
-  <h1>Seznam zápasů budoucí 2</h1>
+  <h1>Seznam zápasů </h1>
   <ul id="matches"></ul>
 
   <script>
@@ -13,47 +13,42 @@
                encodeURIComponent('https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj');
     const leagueIdFilter = 22307;
 
-    async function fetchAllMatches() {
-      let page = 1;
-      let totalPages = 1;
-      const allMatches = [];
+    async function fetchMatches() {
+      try {
+        const response = await fetch(apiBase + '&page=1');
+        if (!response.ok) throw new Error('Chyba při načítání API: ' + response.status);
 
-      do {
-        const response = await fetch(`${apiBase}&page=${page}`);
-        if (!response.ok) {
-          throw new Error('Chyba při načítání API: ' + response.status);
-        }
         const data = await response.json();
 
-        totalPages = Math.ceil(data.pager.total / data.pager.per_page);
+        const filteredMatches = data.results
+          .filter(match => match.league.id == leagueIdFilter)
+          .sort((a, b) => a.time - b.time);
 
-        const filteredMatches = data.results.filter(match => match.league.id == leagueIdFilter);
-        allMatches.push(...filteredMatches);
-
-        page++;
-      } while (page <= totalPages);
-
-      // Seřadíme podle času
-      allMatches.sort((a, b) => a.time - b.time);
-
-      return allMatches;
-    }
-
-    async function displayMatches() {
-      try {
-        const matches = await fetchAllMatches();
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = '';
 
-        if (matches.length === 0) {
+        if (filteredMatches.length === 0) {
           matchesList.textContent = 'Žádné zápasy nenalezeny.';
           return;
         }
 
-        matches.forEach(match => {
+        filteredMatches.forEach(match => {
           const time = new Date(match.time * 1000).toLocaleString();
           const league = match.league.name;
           const home = match.home.name;
           const away = match.away.name;
 
-          co
+          const li = document.createElement('li');
+          li.textContent = `${time} - ${league}: ${home} vs ${away}`;
+          matchesList.appendChild(li);
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById('matches').textContent = 'Chyba při načítání zápasů.';
+      }
+    }
+
+    fetchMatches();
+  </script>
+</body>
+</html>
