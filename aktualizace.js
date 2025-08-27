@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 const TOKEN = '223543-zHPMwtDqu7Sduj'; // Tvůj API token
 const SPORT_ID = 92;
 const LEAGUE_ID = 22307;
@@ -35,7 +34,6 @@ async function fetchJSON(url, retries = 5, delay = 1000) {
 function processMatchData(m) {
   const datum = m.time ? new Date(m.time * 1000).toISOString().split('T')[0] : null;
   const cas = m.time ? new Date(m.time * 1000).toISOString() : null;
-
   let pocet_setu = null;
   if (m.ss) {
     if (['0-3','1-3','2-3','3-2','3-1','3-0'].includes(m.ss)) {
@@ -44,11 +42,10 @@ function processMatchData(m) {
       pocet_setu = 5;
     }
   }
-
   return { datum, cas, pocet_setu };
 }
 
-// uložit zápasy do Supabase
+// uložit zápasy do Supabase (tabulka ended)
 async function upsertMatchesToDb(matches) {
   const rows = matches.map(m => {
     const { datum, cas, pocet_setu } = processMatchData(m);
@@ -78,12 +75,10 @@ async function upsertMatchesToDb(matches) {
       score5_home: m.scores?.[5]?.home || null,
     };
   });
-
   try {
     const { error } = await supabase
       .from('ended')
       .upsert(rows, { onConflict: ['id'] });
-
     if (error) {
       console.error('❌ Chyba při vkládání zápasů:', error.message);
     } 
@@ -92,29 +87,75 @@ async function upsertMatchesToDb(matches) {
   }
 }
 
-// fetch více stránek
+// uložit zápasy do Supabase (tabulka upcoming)
+async function upsertMatchesToUpcomingDb(matches) {
+  const rows = matches.map(m => {
+    const { datum, cas } = processMatchData(m);
+    return {
+      id: m.id,
+      sport_id: m.sport_id ? Number(m.sport_id) : null,
+      time: m.time ? Number(m.time) : null,
+      league_id: m.league?.id || null,
+      league_name: m.league?.name || null,
+      home_id: m.home?.id || null,
+      home_name: m.home?.name || null,
+      away_id: m.away?.id || null,
+      away_name: m.away?.name || null,
+      datum,
+      cas,
+     };
+  });
+  try {
+    const { error } = await supabase
+      .from('upcoming')
+      .upsert(rows, { onConflict: ['id'] });
+    if (error) {
+      console.error('❌ Chyba při vkládání upcoming zápasů:', error.message);
+    } 
+  } catch (err) {
+    console.error('❌ Neošetřená chyba při vkládání upcoming zápasů:', err);
+  }
+}
+
+// fetch více stránek pro ended
 async function fetchAllMatches(maxPages = 10) {
   let allMatches = [];
   for (let page = 1; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
     const apiData = await fetchJSON(url);
     const matches = apiData.results || [];
-
     if (matches.length === 0) {
       console.log(`📭 Stránka ${page} prázdná, ukončuji fetch.`);
       break;
     }
-
     allMatches = allMatches.concat(matches);
     await upsertMatchesToDb(matches);
-
     await new Promise(r => setTimeout(r, 1000));
   }
   console.log(`✅ Celkem načteno ${allMatches.length} zápasů`);
   return allMatches;
 }
 
-// endpoint na ruční spuštění fetch
+// fetch více stránek pro upcoming
+async function fetchUpcomingMatches(maxPages = 3) {
+  let allMatches = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
+    const apiData = await fetchJSON(url);
+    const matches = apiData.results || [];
+    if (matches.length === 0) {
+      console.log(`📭 Stránka ${page} prázdná, ukončuji fetch upcoming.`);
+      break;
+    }
+    allMatches = allMatches.concat(matches);
+    await upsertMatchesToUpcomingDb(matches);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
+  return allMatches;
+}
+
+// endpoint na ruční spuštění fetch ended
 app.get('/matches', async (req, res) => {
   try {
     const matches = await fetchAllMatches(10);
@@ -125,16 +166,29 @@ app.get('/matches', async (req, res) => {
   }
 });
 
+// endpoint na ruční spuštění fetch upcoming
+app.get('/upcoming', async (req, res) => {
+  try {
+    const matches = await fetchUpcomingMatches(3);
+    res.json({ total: matches.length });
+  } catch (err) {
+    console.error('❌ Chyba API nebo DB:', err);
+    res.status(500).json({ error: 'Chyba při načítání dat nebo ukládání' });
+  }
+});
+
 // při startu
 (async () => {
   try {
-    console.log("🚀 Server startuje, stahuju zápasy...");
+    console.log("🚀 Server startuje, stahuju zápasy ended i upcoming...");
     await fetchAllMatches(10);
+    await fetchUpcomingMatches(3);
   } catch (err) {
     console.error("❌ Chyba při start fetch:", err);
   }
 })();
 
+// start serveru
 app.listen(PORT, () => {
   console.log(`✅ Server běží na portu ${PORT}`);
 });
