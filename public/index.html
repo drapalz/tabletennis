@@ -30,47 +30,59 @@
       const container = document.getElementById('filtered-table');
       container.innerHTML = 'Načítám...';
       try {
-        const res = await fetch('/api/filter-upcoming');
-        const data = await res.json();
-
-        if (!Array.isArray(data)) {
-          container.innerHTML = 'Neočekávaná odpověď ze serveru: data nejsou pole.';
-          console.error('Neočekávaná data:', data);
-          return;
-        }
-
-        if (data.length === 0) {
-          container.innerHTML = 'Žádné zápasy nebyly nalezeny';
-          return;
-        }
-
-        let html = '<table border="1" cellpadding="5"><thead><tr>';
-        ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyba počtu'].forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += '</tr></thead><tbody>';
-        
-        data.forEach(row => {
-          html += `<tr>
-            <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
-            <td>${row.home_name || ''}</td>
-            <td>${row.away_name || ''}</td>
-            <td>${row.h2h_100 || ''}</td>
-            <td>${row['35_100'] || ''}</td>
-            <td>${row['45_100'] || ''}</td>
-            <td>${row.h2h_300 || ''}</td>
-            <td>${row['35_300'] || ''}</td>
-            <td>${row['45_300'] || ''}</td>
-            <td>${row.chyba_poctu || ''}</td>
-            </tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = `Chyba: ${e.message}`;
+        const response = await fetch('/api/filter-upcoming');
+        const allMatches = await response.json();
+if (!Array.isArray(allMatches)) {
+        container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+        console.error('Neočekávaná data:', allMatches);
+        return;
       }
+
+      // Filtrování podle podmínek ze zadání
+      const filtered = allMatches.filter(m =>
+        m.h2h_100 > 8 &&
+        m.h2h_300 > 16 &&
+        (
+          ((m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.45 && m["45_300"] < 1.45) ||
+          ((m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3)
+        ) &&
+        m["35_100"] > 0 &&
+        new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000)
+      );
+
+      // Vykreslení tabulky
+      let html = '<table border="1" cellpadding="5"><thead><tr>';
+      ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyba počtu'].forEach(h => {
+        html += `<th>${h}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      filtered.forEach(row => {
+        html += `<tr>
+          <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
+          <td>${row.home_name || ''}</td>
+          <td>${row.away_name || ''}</td>
+          <td>${row.h2h_100 || ''}</td>
+          <td>${row["35_100"] || ''}</td>
+          <td>${row["45_100"] || ''}</td>
+          <td>${row.h2h_300 || ''}</td>
+          <td>${row["35_300"] || ''}</td>
+          <td>${row["45_300"] || ''}</td>
+          <td>${row.chyba_poctu || ''}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+
+    } catch (error) {
+      container.innerHTML = `Chyba: ${error.message}`;
     }
-    document.getElementById('filter-btn').addEventListener('click', loadFilteredMatches);
-  </script>
+  }
+
+  document.getElementById('filter-btn').addEventListener('click', loadAndFilterMatches);
+</script>
+       
+      
 </body>
 </html>
