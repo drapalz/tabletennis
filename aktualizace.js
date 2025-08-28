@@ -217,7 +217,20 @@ app.get('/upcoming', async (req, res) => {
     res.status(500).json({ error: 'Chyba při načítání dat nebo ukládání' });
   }
 });
-
+app.get('/run-all', async (req, res) => {
+  try {
+    const endedMatches = await fetchAllMatches(10);
+    const upcomingMatches = await fetchUpcomingMatches(3);
+    res.json({
+      message: 'Vše proběhlo úspěšně',
+      endedMatchesCount: endedMatches.length,
+      upcomingMatchesCount: upcomingMatches.length,
+    });
+  } catch (err) {
+    console.error('Chyba při spouštění:', err);
+    res.status(500).json({ error: 'Chyba při spouštění' });
+  }
+});
 // při startu
 (async () => {
   try {
