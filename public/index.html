@@ -62,12 +62,12 @@ if (!Array.isArray(allMatches)) {
           <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
           <td>${row.home_name || ''}</td>
           <td>${row.away_name || ''}</td>
-          <td>${row.h2h_100 || ''}</td>
-          <td>${row["35_100"] || ''}</td>
-          <td>${row["45_100"] || ''}</td>
-          <td>${row.h2h_300 || ''}</td>
-          <td>${row["35_300"] || ''}</td>
-          <td>${row["45_300"] || ''}</td>
+          <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+          <td style="background-color: ${row["35_100"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_100"] || ''}</td>
+          <td style="background-color: ${row["45_100"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_100"] || ''}</td>
+          <td style="background-color: ${row.h2h_300 < 20 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
+          <td style="background-color: ${row["35_300"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_300"] || ''}</td>
+          <td style="background-color: ${row["45_300"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_300"] || ''}</td>
           <td>${row.chyba_poctu || ''}</td>
         </tr>`;
       });
