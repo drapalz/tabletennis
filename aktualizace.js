@@ -92,8 +92,7 @@ async function clearUpcomingTable() {
     const { error } = await supabase
       .from('upcoming')
       .delete()
-      .neq('id', '');  // smaže všechny záznamy
-    if (error) {
+      if (error) {
       console.error('❌ Chyba při mazání tabulky upcoming:', error.message);
     } else {
       console.log('🧹 Tabulka upcoming vyprázdněna');
