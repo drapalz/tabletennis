@@ -183,7 +183,8 @@ async function fetchAllMatches(maxPages = 10) {
     await upsertMatchesToDb(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
- 
+ return allMatches;
+}
 
 // endpoint na ruční spuštění fetch ended
 app.get('/matches', async (req, res) => {
