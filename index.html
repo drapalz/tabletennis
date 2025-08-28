@@ -1,69 +1,51 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <title>Sportovní zápasy</title>
+  <meta charset="UTF-8" />
+  <title>Upcoming zápasy</title>
 </head>
 <body>
-  <h1>Seznam zápasů celé ligy</h1>
-  <ul id="matches"></ul>
+  <h1>Upcoming zápasy</h1>
+  <button id="fetch-btn">Načíst a aktualizovat zápasy</button>
+  <div id="results"></div>
 
   <script>
-    const apiBase = 'https://api.allorigins.win/raw?url=' +
-               encodeURIComponent('https://api.b365api.com/v3/events/upcoming?sport_id=92&token=223543-zHPMwtDqu7Sduj');
-    const leagueIdFilter = 22307;
+    document.getElementById('fetch-btn').addEventListener('click', async () => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = 'Načítám…';
 
-    async function fetchAllMatches() {
-      let page = 1;
-      let totalPages = 1;
-      const allMatches = [];
-
-      do {
-        const response = await fetch(`${apiBase}&page=${page}`);
-        if (!response.ok) throw new Error('Chyba při načítání API: ' + response.status);
-
-        const data = await response.json();
-        totalPages = Math.ceil(data.pager.total / data.pager.per_page);
-
-        const filtered = data.results.filter(match => match.league.id == leagueIdFilter);
-        allMatches.push(...filtered);
-
-        page++;
-      } while (page <= totalPages);
-
-      // Seřadíme podle času
-      allMatches.sort((a, b) => a.time - b.time);
-      return allMatches;
-    }
-
-    async function displayMatches() {
       try {
-        const matches = await fetchAllMatches();
-        const matchesList = document.getElementById('matches');
-        matchesList.innerHTML = '';
+        // Spuštění backend fetch a aktualizace
+        const res = await fetch('/upcoming');
+        const data = await res.json();
 
-        if (matches.length === 0) {
-          matchesList.textContent = 'Žádné zápasy nenalezeny.';
+        if (data.error) {
+          resultsDiv.innerHTML = `Chyba: ${data.error}`;
           return;
         }
 
-        matches.forEach(match => {
-          const time = new Date(match.time * 1000).toLocaleString();
-          const league = match.league.name;
-          const home = match.home.name;
-          const away = match.away.name;
+        // Získání zápasů z DB
+        const matchesRes = await fetch('/api/upcoming-matches');
+        const matches = await matchesRes.json();
 
-          const li = document.createElement('li');
-          li.textContent = `${time} - ${league}: ${home} vs ${away}`;
-          matchesList.appendChild(li);
-        });
-      } catch (error) {
-        console.error(error);
-        document.getElementById('matches').textContent = 'Chyba při načítání zápasů.';
+        if (!Array.isArray(matches)) {
+          resultsDiv.innerHTML = 'Chyba při načítání zápasů';
+          return;
+        }
+
+        if (matches.length === 0) {
+          resultsDiv.innerHTML = 'Žádné zápasy k zobrazení';
+          return;
+        }
+
+        // Vykreslení zápasů
+        resultsDiv.innerHTML = '<ul>' + matches.map(m => 
+          `<li>${m.home_name} vs ${m.away_name} dne ${m.datum}</li>`).join('') + '</ul>';
+
+      } catch (err) {
+        resultsDiv.innerHTML = `Chyba: ${err.message}`;
       }
-    }
-
-    displayMatches();
+    });
   </script>
 </body>
 </html>
