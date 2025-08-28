@@ -8,7 +8,6 @@
   <h1>Table Tennis</h1>
  <button id="run-btn">Spustit vše</button>
 <div id="output"></div>
-
 <script>
 document.getElementById('run-btn').addEventListener('click', async () => {
   const output = document.getElementById('output');
@@ -23,6 +22,48 @@ document.getElementById('run-btn').addEventListener('click', async () => {
   }
 });
 </script>
+  <button id="filter-btn">Zobrazit filtrované zápasy</button>
+<div id="filtered-table"></div>
+
+<script>
+async function loadFilteredMatches() {
+  const container = document.getElementById('filtered-table');
+  container.innerHTML = 'Načítám...';
+  try {
+    const res = await fetch('/api/filter-upcoming');
+    const data = await res.json();
+    if (data.length === 0) {
+      container.innerHTML = 'Žádné zápasy nebyly nalezeny';
+      return;
+    }
+    let html = '<table border="1" cellpadding="5"><thead><tr>';
+    ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyba počtu'].forEach(h => {
+      html += `<th>${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    data.forEach(row => {
+      html += `<tr>
+        <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
+        <td>${row.home_name || ''}</td>
+        <td>${row.away_name || ''}</td>
+        <td>${row.h2h_100 || ''}</td>
+        <td>${row['35_100'] || ''}</td>
+        <td>${row['45_100'] || ''}</td>
+        <td>${row.h2h_300 || ''}</td>
+        <td>${row['35_300'] || ''}</td>
+        <td>${row['45_300'] || ''}</td>
+        <td>${row.chyba_poctu || ''}</td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (e) {
+    container.innerHTML = `Chyba: ${e.message}`;
+  }
+}
+document.getElementById('filter-btn').addEventListener('click', loadFilteredMatches);
+</script>
+
 
 </body>
 </html>
