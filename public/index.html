@@ -8,12 +8,23 @@
   <h1>Table Tennis app</h1>
   <button id="fetch-btn">Načíst zápasy</button>
   <div id="results"></div>
-  <script>
-    document.getElementById('fetch-btn').addEventListener('click', async () => {
-      const res = await fetch('/upcoming');
-      const data = await res.json();
-      document.getElementById('results').textContent = JSON.stringify(data);
-    });
-  </script>
+<script>
+document.getElementById('fetch-btn').addEventListener('click', async () => {
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.textContent = 'Probíhá načítání...';
+
+  try {
+    // Zavolá backend endpoint, který spustí aktualizaci (váš aktualizace.js /upcoming)
+    const response = await fetch('/upcoming');
+    if (!response.ok) throw new Error('Chyba serveru při načítání zápasů');
+    const data = await response.json();
+
+    // Zobrazí výsledek na stránce
+    resultsDiv.textContent = `Načteno ${data.total || 'několik'} zápasů.`;
+  } catch (error) {
+    resultsDiv.textContent = `Chyba: ${error.message}`;
+  }
+});
+</script>
 </body>
 </html>
