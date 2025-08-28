@@ -178,7 +178,14 @@ async function fetchAllMatches(maxPages = 10) {
     await upsertMatchesToDb(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
-  console.log(`✅ Celkem načteno ${allMatches.length} zápasů`);
+  // Po načtení dat spustit aktualizaci statistik
+  const { error } = await supabase.rpc('update_upcoming_stats');
+  if (error) {
+    console.error('❌ Chyba při aktualizaci upcoming statistik:', error.message);
+  } else {
+    console.log('✅ Upcoming statistiky aktualizovány');
+  }
+  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
 
