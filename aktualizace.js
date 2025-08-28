@@ -166,10 +166,6 @@ async function fetchUpcomingMatches(maxPages = 3) {
   console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
-  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
-  return allMatches;
-}
-
 
 
 // fetch více stránek pro ended
