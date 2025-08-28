@@ -8,15 +8,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const TOKEN = '223543-zHPMwtDqu7Sduj'; // Tvůj API token
 const SPORT_ID = 92;
 const LEAGUE_ID = 22307;
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
