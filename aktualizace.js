@@ -231,6 +231,30 @@ app.get('/run-all', async (req, res) => {
     res.status(500).json({ error: 'Chyba při spouštění' });
   }
 });
+app.get('/api/filter-upcoming', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('upcoming')
+      .select('home_name, away_name, cas, h2h_100, "35_100", "45_100", h2h_300, "35_300", "45_300", home_oldest, away_oldest, chyba_poctu')
+      .gt('h2h_100', 8)
+      .gt('h2h_300', 16)
+      .or(`
+         (("45_100"<1.29, "45_300"<1.29), ("45_100"<1.45, "45_300"<1.45)),
+         (("35_100"<2.1, "35_300"<2.1), ("35_100"<3, "35_300"<3))
+      `)
+      .gt('35_100', 0)
+      .gt('cas', new Date(Date.now() - 15*60*1000).toISOString())  // čas je větší než aktuální čas mínus 15 minut
+      .order('cas', { ascending: true });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 // při startu
 (async () => {
   try {
