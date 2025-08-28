@@ -13,7 +13,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-app.use(express.static('public'));
+app.use(express.static('tabletennis'));
 
 // fetch s retry
 async function fetchJSON(url, retries = 5, delay = 1000) {
