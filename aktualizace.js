@@ -233,7 +233,7 @@ app.get('/run-all', async (req, res) => {
 });
 app.get('/api/filter-upcoming', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const response = await supabase
       .from('upcoming')
       .select('home_name, away_name, cas, h2h_100, "35_100", "45_100", h2h_300, "35_300", "45_300", home_oldest, away_oldest, chyba_poctu')
       .gt('h2h_100', 8)
@@ -246,12 +246,16 @@ app.get('/api/filter-upcoming', async (req, res) => {
       .gt('cas', new Date(Date.now() - 15*60*1000).toISOString())  // čas je větší než aktuální čas mínus 15 minut
       .order('cas', { ascending: true });
     
-if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({error: error.message});
+console.log('Supabase response:', response);
+
+    if (response.error) {
+      console.error('Supabase error:', response.error);
+      return res.status(500).json({ error: response.error.message });
     }
-    console.log('Supabase data:', data); // zkontrolujte konsoli
-    res.json(data);
+
+    // response.data je očekávané pole
+    res.json(response.data);
+
   } catch (err) {
     console.error('Server error:', err);
     res.status(500).json({ error: err.message });
