@@ -143,7 +143,6 @@ async function upsertMatchesToUpcomingDb(matches) {
 // upravit fetchUpcomingMatches tak, aby při startu vymazal tabulku upcoming
 async function fetchUpcomingMatches(maxPages = 3) {
   await clearUpcomingTable();
-
   let allMatches = [];
   for (let page = 1; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
@@ -157,6 +156,16 @@ async function fetchUpcomingMatches(maxPages = 3) {
     await upsertMatchesToUpcomingDb(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
+   // Po načtení dat spustit aktualizaci statistik
+  const { error } = await supabase.rpc('update_upcoming_stats');
+  if (error) {
+    console.error('❌ Chyba při aktualizaci upcoming statistik:', error.message);
+  } else {
+    console.log('✅ Upcoming statistiky aktualizovány');
+  }
+  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
+  return allMatches;
+}
   console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
@@ -178,16 +187,7 @@ async function fetchAllMatches(maxPages = 10) {
     await upsertMatchesToDb(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
-  // Po načtení dat spustit aktualizaci statistik
-  const { error } = await supabase.rpc('update_upcoming_stats');
-  if (error) {
-    console.error('❌ Chyba při aktualizaci upcoming statistik:', error.message);
-  } else {
-    console.log('✅ Upcoming statistiky aktualizovány');
-  }
-  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
-  return allMatches;
-}
+ 
 
 // endpoint na ruční spuštění fetch ended
 app.get('/matches', async (req, res) => {
