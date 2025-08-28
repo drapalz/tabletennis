@@ -245,10 +245,15 @@ app.get('/api/filter-upcoming', async (req, res) => {
       .gt('35_100', 0)
       .gt('cas', new Date(Date.now() - 15*60*1000).toISOString())  // čas je větší než aktuální čas mínus 15 minut
       .order('cas', { ascending: true });
-
-    if (error) throw error;
+    
+if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({error: error.message});
+    }
+    console.log('Supabase data:', data); // zkontrolujte konsoli
     res.json(data);
   } catch (err) {
+    console.error('Server error:', err);
     res.status(500).json({ error: err.message });
   }
 });
