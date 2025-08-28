@@ -86,11 +86,34 @@ async function upsertMatchesToDb(matches) {
     console.error('❌ Neošetřená chyba při vkládání zápasů:', err);
   }
 }
+// Funkce pro smazání všech záznamů z tabulky upcoming
+async function clearUpcomingTable() {
+  try {
+    const { error } = await supabase
+      .from('upcoming')
+      .delete()
+      .neq('id', '');  // smaže všechny záznamy
+    if (error) {
+      console.error('❌ Chyba při mazání tabulky upcoming:', error.message);
+    } else {
+      console.log('🧹 Tabulka upcoming vyprázdněna');
+    }
+  } catch (err) {
+    console.error('❌ Neošetřená chyba při mazání tabulky upcoming:', err);
+  }
+}
 
-// uložit zápasy do Supabase (tabulka upcoming)
+// upravená funkce pro uložení do tabulky upcoming s přičtením 2 hodin
 async function upsertMatchesToUpcomingDb(matches) {
   const rows = matches.map(m => {
     const { datum, cas } = processMatchData(m);
+    // Přičíst 2 hodiny k času (jednotky v cas jsou ISO string)
+    let casWithOffset = null;
+    if (cas) {
+      const dateObj = new Date(cas);
+      dateObj.setHours(dateObj.getHours() + 2);
+      casWithOffset = dateObj.toISOString();
+    }
     return {
       id: m.id,
       sport_id: m.sport_id ? Number(m.sport_id) : null,
@@ -102,8 +125,8 @@ async function upsertMatchesToUpcomingDb(matches) {
       away_id: m.away?.id || null,
       away_name: m.away?.name || null,
       datum,
-      cas,
-     };
+      cas: casWithOffset,
+    };
   });
   try {
     const { error } = await supabase
@@ -111,11 +134,34 @@ async function upsertMatchesToUpcomingDb(matches) {
       .upsert(rows, { onConflict: ['id'] });
     if (error) {
       console.error('❌ Chyba při vkládání upcoming zápasů:', error.message);
-    } 
+    }
   } catch (err) {
     console.error('❌ Neošetřená chyba při vkládání upcoming zápasů:', err);
   }
 }
+
+// upravit fetchUpcomingMatches tak, aby při startu vymazal tabulku upcoming
+async function fetchUpcomingMatches(maxPages = 3) {
+  await clearUpcomingTable();
+
+  let allMatches = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
+    const apiData = await fetchJSON(url);
+    const matches = apiData.results || [];
+    if (matches.length === 0) {
+      console.log(`📭 Stránka ${page} prázdná, ukončuji fetch upcoming.`);
+      break;
+    }
+    allMatches = allMatches.concat(matches);
+    await upsertMatchesToUpcomingDb(matches);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
+  return allMatches;
+}
+
+
 
 // fetch více stránek pro ended
 async function fetchAllMatches(maxPages = 10) {
