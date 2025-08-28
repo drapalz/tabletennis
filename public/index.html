@@ -22,7 +22,29 @@
       }
     });
   </script>
+  <div id="max-time-display"></div>
+  <script>
+    // Funkce načte a zobrazí max čas ihned po načtení stránky
+    async function loadMaxEndedTime() {
+      const output = document.getElementById('max-time-display');
+      output.textContent = 'Načítám...';
+      try {
+        const res = await fetch('/api/max-ended-time');
+        if (!res.ok) throw new Error('Chyba serveru');
+        const data = await res.json();
+        if (data.maxTimeISO) {
+          const dateStr = new Date(data.maxTimeISO).toLocaleString();
+          output.textContent = `Maximální čas ze tabulky ended je: ${dateStr}`;
+        } else {
+          output.textContent = 'Žádná data nebyla nalezena.';
+        }
+      } catch (err) {
+        output.textContent = `Chyba: ${err.message}`;
+      }
+    }
 
+    window.addEventListener('DOMContentLoaded', loadMaxEndedTime);
+  </script>
   <button id="filter-btn">Zobrazit filtrované zápasy 2</button>
   <div id="filtered-table"></div>
   <script>
