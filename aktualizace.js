@@ -182,25 +182,6 @@ async function fetchAllMatches(maxPages = 10) {
   return allMatches;
 }
 
-// fetch více stránek pro upcoming
-async function fetchUpcomingMatches(maxPages = 3) {
-  let allMatches = [];
-  for (let page = 1; page <= maxPages; page++) {
-    const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
-    const apiData = await fetchJSON(url);
-    const matches = apiData.results || [];
-    if (matches.length === 0) {
-      console.log(`📭 Stránka ${page} prázdná, ukončuji fetch upcoming.`);
-      break;
-    }
-    allMatches = allMatches.concat(matches);
-    await upsertMatchesToUpcomingDb(matches);
-    await new Promise(r => setTimeout(r, 1000));
-  }
-  console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
-  return allMatches;
-}
-
 // endpoint na ruční spuštění fetch ended
 app.get('/matches', async (req, res) => {
   try {
