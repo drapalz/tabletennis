@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "",
-  "main": "aktualizace.js",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node aktualizace.js"
+   "start": "node aktualizace.js"
   },
   "keywords": [],
   "author": "",
