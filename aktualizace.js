@@ -231,6 +231,32 @@ app.get('/run-all', async (req, res) => {
     res.status(500).json({ error: 'Chyba při spouštění' });
   }
 });
+
+app.get('/api/max-ended-time', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('ended')
+      .select('time')
+      .order('time', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Chyba při získání max času:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    if (!data || data.length === 0) {
+      return res.json({ maxTime: null });
+    }
+    // předpokládáme, že 'time' je timestamp v sekundách UNIX (číslo)
+    const maxTimeUnix = data[0].time;
+    const maxTimeISO = new Date(maxTimeUnix * 1000).toISOString();
+    res.json({ maxTimeISO });
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/filter-upcoming', async (req, res) => {
  try {
     const { data, error } = await supabase
@@ -242,9 +268,7 @@ app.get('/api/filter-upcoming', async (req, res) => {
       console.error('Supabase error:', error);
       return res.status(500).json({ error: error.message });
     }
-
     res.json(data);
-
   } catch (err) {
     console.error('Server error:', err);
     res.status(500).json({ error: err.message });
