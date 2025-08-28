@@ -5,7 +5,7 @@
   <title>Table Tennis</title>
 </head>
 <body>
-  <h1>Table Tennis app</h1>
+  <h1>Table Tennis</h1>
  <button id="run-btn">Spustit vše</button>
 <div id="output"></div>
 
@@ -17,7 +17,7 @@ document.getElementById('run-btn').addEventListener('click', async () => {
     const res = await fetch('/run-all');
     if (!res.ok) throw new Error('Chyba serveru');
     const data = await res.json();
-    output.textContent = `Hotovo. Ukončené zápasy: ${data.endedMatches}, Nadcházející zápasy: ${data.upcomingMatches}.`;
+    output.textContent = `Hotovo. Ukončené zápasy: ${data.endedMatchesCount}, Nadcházející zápasy: ${data.upcomingMatchesCount}.`;
   } catch (e) {
     output.textContent = `Chyba: ${e.message}`;
   }
