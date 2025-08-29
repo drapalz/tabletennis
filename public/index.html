@@ -5,7 +5,7 @@
   <title>Table Tennis</title>
 </head>
 <body>
-  <h1>Table Tennis</h1>
+  <h1>TableTennis</h1>
   <button id="run-btn">Spustit vše</button>
   <div id="output"></div>
   <script>
@@ -70,13 +70,11 @@ if (!Array.isArray(allMatches)) {
 
   const negatedCond = !(
     (m["45_100"] > 1.25 && m["45_300"] > 1.31) ||
-    (m["45_100"] > 1.31 && m["45_300"] > 1.25)
-  );
+    (m["45_100"] > 1.31 && m["45_300"] > 1.25)) II
+    !(m["35_100"] < 2.1 || m["35_300"] < 2.1);
 
-  // Podmínka, kterou chcete přidat:
-  const additionalCond = negatedCond || (m["35_100"] < 2.1 || m["35_300"] < 2.1);
-
-  return recentEnough && basicThreshold && (cond45a || cond35a) && additionalCond;
+  
+  return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
 });
 
 
