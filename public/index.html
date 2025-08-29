@@ -45,7 +45,7 @@
 
     window.addEventListener('DOMContentLoaded', loadMaxEndedTime);
   </script>
-  <button id="filter-btn">Zobrazit filtrované zápasy</button>
+  <button id="filter-btn">Zobrazit budoucí zápasy</button>
   <div id="filtered-table"></div>
   <script>
     async function loadFilteredMatches() {
@@ -68,11 +68,11 @@ if (!Array.isArray(allMatches)) {
   const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.49 && m["45_300"] < 1.49;
   const cond35a = (m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3;
 
-  const negatedCond = !(
+  const negatedCond = !
     ((m["45_100"] > 1.25 && m["45_300"] > 1.31) ||
     (m["45_100"] > 1.31 && m["45_300"] > 1.25)) ||
     m["35_100"] < 2.1 || m["35_300"] < 2.1
-      );
+      ;
 
   
   return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
