@@ -61,20 +61,28 @@ if (!Array.isArray(allMatches)) {
       }
 
       // Filtrování podle podmínek ze zadání
-      const filtered = allMatches.filter(m =>
-        m.h2h_100 > 8 &&
-        m.h2h_300 > 16 &&
-        (
-          ((m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.45 && m["45_300"] < 1.45) ||
-          ((m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3)
-        ) &&
-        m["35_100"] > 0 &&
-        new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000)
-      );
+      const filtered = allMatches.filter(m => {
+  const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+  const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16 && m["35_100"] > 0;
+
+  const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.45 && m["45_300"] < 1.45;
+  const cond35a = (m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3;
+
+  const negatedCond = !(
+    (m["45_100"] > 1.25 && m["45_300"] > 1.31) ||
+    (m["45_100"] > 1.31 && m["45_300"] > 1.25)
+  );
+
+  // Podmínka, kterou chcete přidat:
+  const additionalCond = negatedCond || (m["35_100"] < 2.1 || m["35_300"] < 2.1);
+
+  return recentEnough && basicThreshold && (cond45a || cond35a) && additionalCond;
+});
+
 
       // Vykreslení tabulky
       let html = '<table border="1" cellpadding="5"><thead><tr>';
-      ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyba počtu'].forEach(h => {
+      ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyby'].forEach(h => {
         html += `<th>${h}</th>`;
       });
       html += '</tr></thead><tbody>';
