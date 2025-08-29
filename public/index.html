@@ -65,7 +65,7 @@ if (!Array.isArray(allMatches)) {
   const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
   const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16 && m["35_100"] > 0;
 
-  const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.45 && m["45_300"] < 1.45;
+  const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.49 && m["45_300"] < 1.49;
   const cond35a = (m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3;
 
   const negatedCond = !(
