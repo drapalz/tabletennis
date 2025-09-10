@@ -155,16 +155,11 @@ async function fetchMinOddsForEvent(event_id) {
   const url = `https://api.b365api.com/v2/event/odds/summary?token=${TOKEN}&event_id=${event_id}`;
   try {
     const data = await fetchJSON(url);
-    if (data.success && data.results && data.results.Bet365 && data.results.Bet365.odds && data.results.Bet365.odds.end && data.results.Bet365.odds.end.92_1) {
-      const endOdds = data.results.Bet365.odds.end.92_1;
-      let homeOdds = [];
-      let awayOdds = [];
-      for (const key in endOdds) {
-        if (endOdds[key].home_od) homeOdds.push(parseFloat(endOdds[key].home_od));
-        if (endOdds[key].away_od) awayOdds.push(parseFloat(endOdds[key].away_od));
-      }
-      const minHome = homeOdds.length ? Math.min(...homeOdds) : null;
-      const minAway = awayOdds.length ? Math.min(...awayOdds) : null;
+    if (data.success && data.results && data.results.Bet365 && data.results.Bet365.odds && data.results.Bet365.odds.end && data.results.Bet365.odds.end["92_1"]) {
+       const endOdds = data.results.Bet365.odds.end["92_1"];
+      const minHome = endOdds.home_od ? parseFloat(endOdds.home_od) : null;
+      const minAway = endOdds.away_od ? parseFloat(endOdds.away_od) : null;
+      
       return { minHome, minAway };
     } else {
       return { minHome: null, minAway: null };
@@ -174,7 +169,6 @@ async function fetchMinOddsForEvent(event_id) {
     return { minHome: null, minAway: null };
   }
 }
-
 // Funkce která aktualizuje kurz (kurzy) v tabulce upcoming pro seznam zápasů
 async function updateOddsForUpcomingMatches(matches) {
   for (const match of matches) {
