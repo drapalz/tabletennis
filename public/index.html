@@ -81,7 +81,7 @@ if (!Array.isArray(allMatches)) {
 
       // Vykreslení tabulky
       let html = '<table border="1" cellpadding="5"><thead><tr>';
-      ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Chyby'].forEach(h => {
+      ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Kurz', 'Chyby'].forEach(h => {
         html += `<th>${h}</th>`;
       });
       html += '</tr></thead><tbody>';
@@ -97,6 +97,7 @@ if (!Array.isArray(allMatches)) {
           <td style="background-color: ${row.h2h_300 < 20 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
           <td style="background-color: ${row["35_300"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_300"] || ''}</td>
           <td style="background-color: ${row["45_300"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_300"] || ''}</td>
+          <td>${row.kurz || ''}</td>
           <td>${row.chyba_poctu || ''}</td>
         </tr>`;
       });
