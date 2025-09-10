@@ -173,19 +173,30 @@ async function fetchMinOddsForEvent(event_id) {
 async function updateOddsForUpcomingMatches(matches) {
   for (const match of matches) {
     const { minHome, minAway } = await fetchMinOddsForEvent(match.id);
-    if (minHome !== null || minAway !== null) {
-      // Například uložit JSON string do sloupce 'kurz' jako { home: x, away: y }
-      const kurzValue = JSON.stringify({ home: minHome, away: minAway });
+
+    // Spočítat minimum z hodnot, které nejsou null
+    let minValue = null;
+    if (minHome !== null && minAway !== null) {
+      minValue = Math.min(minHome, minAway);
+    } else if (minHome !== null) {
+      minValue = minHome;
+    } else if (minAway !== null) {
+      minValue = minAway;
+    }
+
+    if (minValue !== null) {
       const { error } = await supabase
         .from('upcoming')
-        .update({ kurz: kurzValue })
+        .update({ kurz: minValue })  // kurz je nyní číslo
         .eq('id', match.id);
+
       if (error) {
         console.error(`Chyba při aktualizaci kurzu pro event ${match.id}:`, error.message);
       }
     }
   }
 }
+
 
 // upravit fetchUpcomingMatches tak, aby při startu vymazal tabulku upcoming a aktualizoval kurzy
 async function fetchUpcomingMatches(maxPages = 3) {
