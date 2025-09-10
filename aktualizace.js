@@ -1,7 +1,6 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { createClient } from '@supabase/supabase-js';
-
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -96,14 +95,15 @@ async function upsertMatchesToDb(matches) {
     console.error('❌ Neošetřená chyba při vkládání zápasů:', err);
   }
 }
+
 // Funkce pro smazání všech záznamů z tabulky upcoming
 async function clearUpcomingTable() {
   try {
     const { error } = await supabase
       .from('upcoming')
       .delete()
-     .neq('id', 0);  // předpokládá, že žádný záznam nemá id=0, takže smaže všechny
-      if (error) {
+      .neq('id', 0);  // předpokládá, že žádný záznam nemá id=0, takže smaže všechny
+    if (error) {
       console.error('❌ Chyba při mazání tabulky upcoming:', error.message);
     } else {
       console.log('🧹 Tabulka upcoming vyprázdněna');
@@ -150,7 +150,50 @@ async function upsertMatchesToUpcomingDb(matches) {
   }
 }
 
-// upravit fetchUpcomingMatches tak, aby při startu vymazal tabulku upcoming
+// Fetch odds for a single event and return minimal home_od and away_od from 'end' odds
+async function fetchMinOddsForEvent(event_id) {
+  const url = `https://api.b365api.com/v2/event/odds/summary?token=${TOKEN}&event_id=${event_id}`;
+  try {
+    const data = await fetchJSON(url);
+    if (data.success && data.results && data.results.Bet365 && data.results.Bet365.odds && data.results.Bet365.odds.end && data.results.Bet365.odds.end.92_1) {
+      const endOdds = data.results.Bet365.odds.end.92_1;
+      let homeOdds = [];
+      let awayOdds = [];
+      for (const key in endOdds) {
+        if (endOdds[key].home_od) homeOdds.push(parseFloat(endOdds[key].home_od));
+        if (endOdds[key].away_od) awayOdds.push(parseFloat(endOdds[key].away_od));
+      }
+      const minHome = homeOdds.length ? Math.min(...homeOdds) : null;
+      const minAway = awayOdds.length ? Math.min(...awayOdds) : null;
+      return { minHome, minAway };
+    } else {
+      return { minHome: null, minAway: null };
+    }
+  } catch (err) {
+    console.warn(`Fetch odds failed for event ${event_id}:`, err.message);
+    return { minHome: null, minAway: null };
+  }
+}
+
+// Funkce která aktualizuje kurz (kurzy) v tabulce upcoming pro seznam zápasů
+async function updateOddsForUpcomingMatches(matches) {
+  for (const match of matches) {
+    const { minHome, minAway } = await fetchMinOddsForEvent(match.id);
+    if (minHome !== null || minAway !== null) {
+      // Například uložit JSON string do sloupce 'kurz' jako { home: x, away: y }
+      const kurzValue = JSON.stringify({ home: minHome, away: minAway });
+      const { error } = await supabase
+        .from('upcoming')
+        .update({ kurz: kurzValue })
+        .eq('id', match.id);
+      if (error) {
+        console.error(`Chyba při aktualizaci kurzu pro event ${match.id}:`, error.message);
+      }
+    }
+  }
+}
+
+// upravit fetchUpcomingMatches tak, aby při startu vymazal tabulku upcoming a aktualizoval kurzy
 async function fetchUpcomingMatches(maxPages = 3) {
   await clearUpcomingTable();
   let allMatches = [];
@@ -164,9 +207,13 @@ async function fetchUpcomingMatches(maxPages = 3) {
     }
     allMatches = allMatches.concat(matches);
     await upsertMatchesToUpcomingDb(matches);
+
+    // Nově doplněno:
+    await updateOddsForUpcomingMatches(matches);
+
     await new Promise(r => setTimeout(r, 1000));
   }
-   // Po načtení dat spustit aktualizaci statistik
+  // Po načtení dat spustit aktualizaci statistik
   const { error } = await supabase.rpc('update_upcoming_stats');
   if (error) {
     console.error('❌ Chyba při aktualizaci upcoming statistik:', error.message);
@@ -176,7 +223,6 @@ async function fetchUpcomingMatches(maxPages = 3) {
   console.log(`✅ Celkem načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
-
 
 // fetch více stránek pro ended
 async function fetchAllMatches(maxPages = 10) {
@@ -193,7 +239,7 @@ async function fetchAllMatches(maxPages = 10) {
     await upsertMatchesToDb(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
- return allMatches;
+  return allMatches;
 }
 
 // endpoint na ruční spuštění fetch ended
@@ -217,6 +263,8 @@ app.get('/upcoming', async (req, res) => {
     res.status(500).json({ error: 'Chyba při načítání dat nebo ukládání' });
   }
 });
+
+// endpoint pro spuštění všeho najednou
 app.get('/run-all', async (req, res) => {
   try {
     const endedMatches = await fetchAllMatches(10);
@@ -232,6 +280,7 @@ app.get('/run-all', async (req, res) => {
   }
 });
 
+// endpoint pro max ended time
 app.get('/api/max-ended-time', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -239,7 +288,6 @@ app.get('/api/max-ended-time', async (req, res) => {
       .select('time')
       .order('time', { ascending: false })
       .limit(1);
-
     if (error) {
       console.error('Chyba při získání max času:', error);
       return res.status(500).json({ error: error.message });
@@ -247,7 +295,6 @@ app.get('/api/max-ended-time', async (req, res) => {
     if (!data || data.length === 0) {
       return res.json({ maxTime: null });
     }
-    // předpokládáme, že 'time' je timestamp v sekundách UNIX (číslo)
     const maxTimeUnix = data[0].time;
     const maxTimeISO = new Date(maxTimeUnix * 1000).toISOString();
     res.json({ maxTimeISO });
@@ -257,13 +304,13 @@ app.get('/api/max-ended-time', async (req, res) => {
   }
 });
 
+// endpoint pro filtrované upcoming zápasy
 app.get('/api/filter-upcoming', async (req, res) => {
- try {
+  try {
     const { data, error } = await supabase
       .from('upcoming')
-      .select('home_name, away_name, cas, h2h_100, "35_100", "45_100", h2h_300, "35_300", "45_300", chyba_poctu, home_id, away_id')
+      .select('home_name, away_name, cas, h2h_100, "35_100", "45_100", h2h_300, "35_300", "45_300", chyba_poctu, home_id, away_id, kurz')
       .order('cas', { ascending: true });
-
     if (error) {
       console.error('Supabase error:', error);
       return res.status(500).json({ error: error.message });
