@@ -97,7 +97,9 @@ if (!Array.isArray(allMatches)) {
           <td style="background-color: ${row.h2h_300 < 20 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
           <td style="background-color: ${row["35_300"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_300"] || ''}</td>
           <td style="background-color: ${row["45_300"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_300"] || ''}</td>
-          <td style="background-color: ${row.kurz < 1.31 ? '#FFC0CB' : 'transparent'}">${row.kurz || ''}</td>
+          <td style="background-color: ${row.kurz < 1.31 ? '#FFC0CB' : 
+                                         row.kurz > 1.55 ? '#D1F9B3' :
+                                         'transparent'}">${row.kurz || ''}</td>
           <td>${row.chyba_poctu || ''}</td>
         </tr>`;
       });
