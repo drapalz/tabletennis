@@ -135,7 +135,6 @@ async function fetchUpcomingMatches(maxPages = 3) {
     if (matches.length === 0) break;
     allMatches = allMatches.concat(matches);
     await upsertMatchesToUpcomingDb(matches);
-    await updateOddsForUpcomingMatches(matches);
     await new Promise(r => setTimeout(r, 1000));
   }
   const { error } = await supabase.rpc('update_upcoming_stats');
