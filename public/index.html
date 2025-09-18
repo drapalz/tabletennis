@@ -2,19 +2,41 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Table Tennis forehand</title>
+  <title>Setka</title>
 </head>
 <body>
-  <h1>Table Tennis FOREHAND</h1>
+  <h1>Setka</h1>
 
+ <style>
+  #button-row {
+    display: flex;
+    gap: 15px;          /* mezery mezi tlačítky */
+    margin-bottom: 20px;
+  }
+  #button-row button {
+    flex: 1;            /* tlačítka se rozdělí rovnoměrně */
+    padding: 15px 25px; /* větší velikost */
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 2px solid #007BFF;
+    background-color: #E7F1FF;
+    transition: background-color 0.3s;
+  }
+  #button-row button:hover {
+    background-color: #B0D2FF;
+  }
+</style>
+
+<div id="button-row">
   <button id="upload-ended-btn">Nahrej do ended</button>
-  <div id="output-ended"></div>
-
   <button id="upload-upcoming-btn">Nahraj do upcoming</button>
-  <div id="output-upcoming"></div>
-
   <button id="update-odds-btn">Dopln kurz</button>
-  <div id="output-odds"></div>
+</div>
+
+<div id="output-ended"></div>
+<div id="output-upcoming"></div>
+<div id="output-odds"></div>
 
   <button id="filter-btn">Zobrazit budoucí zápasy</button>
   <div id="filtered-table"></div>
