@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka</title>
+  <title>Setka1</title>
   <style>
     #button-row {
       display: flex;
@@ -162,7 +162,7 @@
         const filter3 = data.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
-          const cond30 = (m.home_100 < 4 && m.homa_100> 0) || (m.away_100 > 0 && m.away_100< 4);
+          const cond30 = (m.home_100 < 4 && m.home_100> 0) || (m.away_100 > 0 && m.away_100< 4);
           return recentEnough && basicThreshold && cond30;
         });
     let html = '<table border="1" cellpadding="5"><thead><tr>';
