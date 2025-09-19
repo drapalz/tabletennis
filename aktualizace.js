@@ -213,6 +213,19 @@ app.get('/api/filter-upcoming', async (req, res) => {
   }
 });
 
+app.get('/api/filter-3-0', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('upcoming')
+      .select('home_name, away_name, cas, h2h_30,h2h_100, h2h_300, home_30, home_100, home_300, away_30, away_100, away_300, chyba_poctu, kurz')
+      .order('cas', { ascending: true });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
