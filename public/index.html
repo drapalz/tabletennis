@@ -159,7 +159,7 @@
       return;
     }
      // filtr
-        const filtered = allMatches.filter(m => {
+        const filtered = data.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
           const cond30 = m.home_100 < 4 || m.away_100< 4;
