@@ -25,7 +25,7 @@
   </style>
 </head>
 <body>
-  <h1>Setka</h1>
+  <h1>Setka 3:0</h1>
   <div id="button-row">
     <button id="upload-ended-btn">Nahrej do ended</button>
     <button id="upload-upcoming-btn">Nahraj do upcoming</button>
@@ -146,50 +146,50 @@
       }
     });
 
-    // Nový filtr "FILTR 3:0" - celá tabulka upcoming, filtrace v JS
-    document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
-      const container = document.getElementById('filtered-table');
-      container.innerHTML = 'Načítám data...';
-      try {
-        const response = await fetch('/filter-3-0');
-        if (!response.ok) throw new Error('Chyba serveru při načítání dat');
-        const allMatches = await response.json();
-        if (!Array.isArray(allMatches)) {
-          container.innerHTML = 'Neočekávaná odpověď ze serveru.';
-          console.error('Neočekávaná data:', allMatches);
-          return;
-        }
-        // Filtrace dle zadání: h2h_100 > 8 a (home_100 < 4 nebo away_100 < 4)
-        const filtered = allMatches.filter(m => m.h2h_100 > 8 && (m.home_100 < 4 || m.away_100 < 4));
-        let html = '<table border="1" cellpadding="5"><thead><tr>';
-        ['Datum a čas', 'Domácí', 'Hosté', 'Kurz', 'H2H 30', 'H2H 100', 'H2H 300', 'Home 30', 'Home 100', 'Home 300', 'Away 30', 'Away 100', 'Away 300', 'Chyba počtu'].forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += '</tr></thead><tbody>';
-        filtered.forEach(row => {
-          html += `<tr>
-            <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
-            <td>${row.home_name || ''}</td>
-            <td>${row.away_name || ''}</td>
-            <td>${row.kurz || ''}</td>
-            <td>${row.h2h_30 || ''}</td>
-            <td>${row.h2h_100 || ''}</td>
-            <td>${row.h2h_300 || ''}</td>
-            <td>${row.home_30 || ''}</td>
-            <td>${row.home_100 || ''}</td>
-            <td>${row.home_300 || ''}</td>
-            <td>${row.away_30 || ''}</td>
-            <td>${row.away_100 || ''}</td>
-            <td>${row.away_300 || ''}</td>
-            <td>${row.chyba_poctu || ''}</td>
-          </tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      } catch (error) {
-        container.innerHTML = `Chyba: ${error.message}`;
-      }
+   document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
+  const container = document.getElementById('filtered-table');
+  container.innerHTML = 'Načítám data...';
+  try {
+    const response = await fetch('/api/filter-3-0');
+    if (!response.ok) throw new Error('Chyba serveru při načítání dat');
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+      console.error('Neočekávaná data:', data);
+      return;
+    }
+    let html = '<table border="1" cellpadding="5"><thead><tr>';
+    ['Datum a čas', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'Home 30', 'Home 100', 'Home 300', 'Away 30', 'Away 100', 'Away 300', 'Kurz', 'Chyba počtu'].forEach(h => {
+      html += `<th>${h}</th>`;
     });
+    html += '</tr></thead><tbody>';
+
+    data.forEach(row => {
+      html += `<tr>
+        <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
+        <td>${row.home_name || ''}</td>
+        <td>${row.away_name || ''}</td>
+        <td>${row.h2h_30 || ''}</td>
+        <td>${row.h2h_100 || ''}</td>
+        <td>${row.h2h_300 || ''}</td>
+        <td>${row.home_30 || ''}</td>
+        <td>${row.home_100 || ''}</td>
+        <td>${row.home_300 || ''}</td>
+        <td>${row.away_30 || ''}</td>
+        <td>${row.away_100 || ''}</td>
+        <td>${row.away_300 || ''}</td>
+        <td>${row.kurz || ''}</td>
+        <td>${row.chyba_poctu || ''}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (error) {
+    container.innerHTML = `Chyba: ${error.message}`;
+  }
+});
+
   </script>
 </body>
 </html>
