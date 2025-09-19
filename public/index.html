@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka</title>
+  <title>Setka 3</title>
   <style>
     #button-row {
       display: flex;
@@ -159,7 +159,7 @@
       return;
     }
      // filtr
-        const filtered = data.filter(m => {
+        const filter3 = data.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
           const cond30 = m.home_100 < 4 || m.away_100< 4;
@@ -171,7 +171,7 @@
     });
     html += '</tr></thead><tbody>';
 
-    data.forEach(row => {
+    filter3.forEach(row => {
       html += `<tr>
         <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
         <td>${row.home_name || ''}</td>
