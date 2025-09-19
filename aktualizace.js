@@ -1,195 +1,222 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-  <meta charset="UTF-8" />
-  <title>Setka</title>
-  <style>
-    #button-row {
-      display: flex;
-      gap: 15px;          /* mezery mezi tlačítky */
-      margin-bottom: 20px;
+import express from 'express';
+import fetch from 'node-fetch';
+import { createClient } from '@supabase/supabase-js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const TOKEN = '223543-zHPMwtDqu7Sduj';
+const SPORT_ID = 92;
+const LEAGUE_ID = 22307;
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+app.use(express.static('public'));
+
+async function fetchJSON(url, retries = 5, delay = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      console.warn(`⚠️ Fetch selhal (${err.message}), pokus ${attempt}/${retries}, čekám ${delay*attempt}ms...`);
+      await new Promise(r => setTimeout(r, delay * attempt));
     }
-    #button-row button {
-      flex: 1;            /* tlačítka se rozdělí rovnoměrně */
-      padding: 15px 25px; /* větší velikost */
-      font-size: 1.2em;
-      cursor: pointer;
-      border-radius: 8px;
-      border: 2px solid #007BFF;
-      background-color: #E7F1FF;
-      transition: background-color 0.3s;
+  }
+}
+
+function processMatchData(m) {
+  const datum = m.time ? new Date(m.time * 1000).toISOString().split('T')[0] : null;
+  const cas = m.time ? new Date(m.time * 1000).toISOString() : null;
+  return { datum, cas };
+}
+
+async function upsertMatchesToDb(matches) {
+  const rows = matches.map(m => {
+    const { datum, cas } = processMatchData(m);
+    return {
+      id: m.id,
+      sport_id: m.sport_id ? Number(m.sport_id) : null,
+      time: m.time ? Number(m.time) : null,
+      league_id: m.league?.id || null,
+      league_name: m.league?.name || null,
+      home_id: m.home?.id || null,
+      home_name: m.home?.name || null,
+      away_id: m.away?.id || null,
+      away_name: m.away?.name || null,
+      datum,
+      cas,
+    };
+  });
+  const { error } = await supabase.from('ended').upsert(rows, { onConflict: ['id'] });
+  if (error) console.error('❌ Chyba při vkládání ended:', error.message);
+}
+
+async function clearUpcomingTable() {
+  const { error } = await supabase.from('upcoming').delete().neq('id', 0);
+  if (error) console.error('❌ Chyba při mazání upcoming:', error.message);
+  else console.log('🧹 upcoming vyprázdněna');
+}
+
+async function upsertMatchesToUpcomingDb(matches) {
+  const rows = matches.map(m => {
+    const { datum, cas } = processMatchData(m);
+    let casWithOffset = null;
+    if (cas) {
+      const d = new Date(cas);
+      d.setHours(d.getHours() + 2);
+      casWithOffset = d.toISOString();
     }
-    #button-row button:hover {
-      background-color: #B0D2FF;
+    return {
+      id: m.id,
+      sport_id: m.sport_id ? Number(m.sport_id) : null,
+      time: m.time ? Number(m.time) : null,
+      league_id: m.league?.id || null,
+      league_name: m.league?.name || null,
+      home_id: m.home?.id || null,
+      home_name: m.home?.name || null,
+      away_id: m.away?.id || null,
+      away_name: m.away?.name || null,
+      datum,
+      cas: casWithOffset,
+    };
+  });
+  const { error } = await supabase.from('upcoming').upsert(rows, { onConflict: ['id'] });
+  if (error) console.error('❌ Chyba při vkládání upcoming:', error.message);
+}
+
+async function fetchMinOddsForEvent(event_id) {
+  const url = `https://api.b365api.com/v2/event/odds/summary?token=${TOKEN}&event_id=${event_id}`;
+  try {
+    const data = await fetchJSON(url);
+    if (data.success && data.results?.Bet365?.odds?.end?.["92_1"]) {
+      const endOdds = data.results.Bet365.odds.end["92_1"];
+      const minHome = endOdds.home_od ? parseFloat(endOdds.home_od) : null;
+      const minAway = endOdds.away_od ? parseFloat(endOdds.away_od) : null;
+      return { minHome, minAway };
     }
-  </style>
-</head>
-<body>
-  <h1>Setka</h1>
-  <div id="button-row">
-    <button id="upload-ended-btn">Nahrej do ended</button>
-    <button id="upload-upcoming-btn">Nahraj do upcoming</button>
-    <button id="update-odds-btn">Dopln kurz</button>
-    <button id="filter-btn">Zobrazit budoucí zápasy</button>
-    <button id="forehand-filter-btn">FILTR 3:0</button>
-  </div>
-  <div id="output-ended"></div>
-  <div id="output-upcoming"></div>
-  <div id="output-odds"></div>
-  <div id="filtered-table"></div>
-  <div id="max-time-display"></div>
+    return { minHome: null, minAway: null };
+  } catch (err) {
+    console.warn(`Fetch odds failed for ${event_id}:`, err.message);
+    return { minHome: null, minAway: null };
+  }
+}
 
-  <script>
-    async function loadMaxEndedTime() {
-      const output = document.getElementById('max-time-display');
-      output.textContent = 'Načítám...';
-      try {
-        const res = await fetch('/api/max-ended-time');
-        if (!res.ok) throw new Error('Chyba serveru');
-        const data = await res.json();
-        if (data.maxTimeISO) {
-          const dateStr = new Date(data.maxTimeISO).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' });
-          output.textContent = `Maximální čas ze tabulky ended je: ${dateStr}`;
-        } else {
-          output.textContent = 'Žádná data nebyla nalezena.';
-        }
-      } catch (err) {
-        output.textContent = `Chyba: ${err.message}`;
-      }
+async function updateOddsForUpcomingMatches(matches) {
+  for (const match of matches) {
+    const { minHome, minAway } = await fetchMinOddsForEvent(match.id);
+    let minValue = null;
+    if (minHome !== null && minAway !== null) minValue = Math.min(minHome, minAway);
+    else if (minHome !== null) minValue = minHome;
+    else if (minAway !== null) minValue = minAway;
+
+    if (minValue !== null) {
+      const { error } = await supabase.from('upcoming').update({ kurz: minValue }).eq('id', match.id);
+      if (error) console.error(`Chyba při aktualizaci kurzu pro ${match.id}:`, error.message);
     }
-    window.addEventListener('DOMContentLoaded', loadMaxEndedTime);
+  }
+}
 
-    document.getElementById('upload-ended-btn').addEventListener('click', async () => {
-      const output = document.getElementById('output-ended');
-      output.textContent = 'Nahraju ended zápasy...';
-      try {
-        const res = await fetch('/matches');
-        if (!res.ok) throw new Error('Chyba serveru');
-        const data = await res.json();
-        output.textContent = `Hotovo. Ukončené zápasy: ${data.total}`;
-      } catch (e) {
-        output.textContent = `Chyba: ${e.message}`;
-      }
-    });
+async function fetchUpcomingMatches(maxPages = 3) {
+  await clearUpcomingTable();
+  let allMatches = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
+    const apiData = await fetchJSON(url);
+    const matches = apiData.results || [];
+    if (matches.length === 0) break;
+    allMatches = allMatches.concat(matches);
+    await upsertMatchesToUpcomingDb(matches);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  const { error } = await supabase.rpc('update_upcoming_stats');
+  if (error) console.error('❌ Chyba update statistik:', error.message);
+  console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
+  return allMatches;
+}
 
-    document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
-      const output = document.getElementById('output-upcoming');
-      output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
-      try {
-        const res = await fetch('/upcoming');
-        if (!res.ok) throw new Error('Chyba serveru');
-        const data = await res.json();
-        output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
-      } catch (e) {
-        output.textContent = `Chyba: ${e.message}`;
-      }
-    });
+async function fetchAllMatches(maxPages = 10) {
+  let allMatches = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
+    const apiData = await fetchJSON(url);
+    const matches = apiData.results || [];
+    if (matches.length === 0) break;
+    allMatches = allMatches.concat(matches);
+    await upsertMatchesToDb(matches);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  return allMatches;
+}
 
-    document.getElementById('update-odds-btn').addEventListener('click', async () => {
-      const output = document.getElementById('output-odds');
-      output.textContent = 'Aktualizuji kurzy...';
-      try {
-        const res = await fetch('/update-odds');
-        if (!res.ok) throw new Error('Chyba serveru při update kurzů');
-        const data = await res.json();
-        output.textContent = `Kurzy aktualizovány pro ${data.updatedCount || 'několik'} zápasů.`;
-      } catch (e) {
-        output.textContent = `Chyba: ${e.message}`;
-      }
-    });
+// Endpoints
 
-    document.getElementById('filter-btn').addEventListener('click', async () => {
-      const container = document.getElementById('filtered-table');
-      container.innerHTML = 'Načítám...';
-      try {
-        const response = await fetch('/api/filter-upcoming');
-        if (!response.ok) throw new Error('Chyba serveru při načítání zápasů');
-        const allMatches = await response.json();
-        if (!Array.isArray(allMatches)) {
-          container.innerHTML = 'Neočekávaná odpověď ze serveru.';
-          console.error('Neočekávaná data:', allMatches);
-          return;
-        }
-        // stávající filtr, který už máte
-        const filtered = allMatches.filter(m => {
-          const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
-          const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16 && m["35_100"] > 0;
-          const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.49 && m["45_300"] < 1.49;
-          const cond35a = (m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3;
-          const negatedCond = !((m["45_100"] > 1.245 && m["45_300"] > 1.295) || (m["45_100"] > 1.29 && m["45_300"] > 1.245)) || m["35_100"] < 2.1 || m["35_300"] < 2.1;
-          return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
-        });
-        let html = '<table border="1" cellpadding="5"><thead><tr>';
-        ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Kurz', 'Chyby'].forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += '</tr></thead><tbody>';
-        filtered.forEach(row => {
-          html += `<tr>
-            <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
-            <td>${row.home_name || ''}</td>
-            <td>${row.away_name || ''}</td>
-            <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
-            <td style="background-color: ${row["35_100"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_100"] || ''}</td>
-            <td style="background-color: ${row["45_100"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_100"] || ''}</td>
-            <td style="background-color: ${row.h2h_300 < 20 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
-            <td style="background-color: ${row["35_300"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_300"] || ''}</td>
-            <td style="background-color: ${row["45_300"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_300"] || ''}</td>
-            <td style="background-color: ${row.kurz < 1.31 ? '#FFC0CB' : row.kurz > 1.55 ? '#D1F9B3' : 'transparent'}">${row.kurz || ''}</td>
-            <td>${row.chyba_poctu || ''}</td>
-          </tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      } catch (error) {
-        container.innerHTML = `Chyba: ${error.message}`;
-      }
-    });
+app.get('/matches', async (req, res) => {
+  try {
+    const matches = await fetchAllMatches(10);
+    res.json({ total: matches.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-    // Nový filtr "FILTR 3:0" - celá tabulka upcoming, filtrace v JS
-    document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
-      const container = document.getElementById('filtered-table');
-      container.innerHTML = 'Načítám data...';
-      try {
-        const response = await fetch('/upcoming');
-        if (!response.ok) throw new Error('Chyba serveru při načítání dat');
-        const allMatches = await response.json();
-        if (!Array.isArray(allMatches)) {
-          container.innerHTML = 'Neočekávaná odpověď ze serveru.';
-          console.error('Neočekávaná data:', allMatches);
-          return;
-        }
-        // Filtrace dle zadání: h2h_100 > 8 a (home_100 < 4 nebo away_100 < 4)
-        const filtered = allMatches.filter(m => m.h2h_100 > 8 && (m.home_100 < 4 || m.away_100 < 4));
-        let html = '<table border="1" cellpadding="5"><thead><tr>';
-        ['Datum a čas', 'Domácí', 'Hosté', 'Kurz', 'H2H 30', 'H2H 100', 'H2H 300', 'Home 30', 'Home 100', 'Home 300', 'Away 30', 'Away 100', 'Away 300', 'Chyba počtu'].forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += '</tr></thead><tbody>';
-        filtered.forEach(row => {
-          html += `<tr>
-            <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
-            <td>${row.home_name || ''}</td>
-            <td>${row.away_name || ''}</td>
-            <td>${row.kurz || ''}</td>
-            <td>${row.h2h_30 || ''}</td>
-            <td>${row.h2h_100 || ''}</td>
-            <td>${row.h2h_300 || ''}</td>
-            <td>${row.home_30 || ''}</td>
-            <td>${row.home_100 || ''}</td>
-            <td>${row.home_300 || ''}</td>
-            <td>${row.away_30 || ''}</td>
-            <td>${row.away_100 || ''}</td>
-            <td>${row.away_300 || ''}</td>
-            <td>${row.chyba_poctu || ''}</td>
-          </tr>`;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
-      } catch (error) {
-        container.innerHTML = `Chyba: ${error.message}`;
-      }
-    });
-  </script>
-</body>
-</html>
+app.get('/upcoming', async (req, res) => {
+  try {
+    const matches = await fetchUpcomingMatches(3);
+    res.json({ total: matches.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/update-odds', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('upcoming').select('*');
+    if (error) throw error;
+    await updateOddsForUpcomingMatches(data);
+    res.json({ message: 'Kurzy aktualizovány', updatedCount: data.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/max-ended-time', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('ended').select('time').order('time', { ascending: false }).limit(1);
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data.length) return res.json({ maxTimeISO: null });
+    const maxTimeISO = new Date(data[0].time * 1000).toISOString();
+    res.json({ maxTimeISO });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/filter-upcoming', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('upcoming')
+      .select('home_name, away_name, cas, h2h_100, "35_100", "45_100", h2h_300, "35_300", "45_300", chyba_poctu, kurz')
+      .order('cas', { ascending: true });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ Server běží na portu ${PORT}`);
+});
