@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka</title>
+  <title>Setka 1</title>
   <style>
     #button-row {
       display: flex;
@@ -151,7 +151,7 @@
       const container = document.getElementById('filtered-table');
       container.innerHTML = 'Načítám data...';
       try {
-        const response = await fetch('/upcoming');
+        const response = await fetch('/filter-3-0');
         if (!response.ok) throw new Error('Chyba serveru při načítání dat');
         const allMatches = await response.json();
         if (!Array.isArray(allMatches)) {
