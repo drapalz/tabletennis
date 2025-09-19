@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka 1</title>
+  <title>Setka</title>
   <style>
     #button-row {
       display: flex;
@@ -158,6 +158,13 @@
       console.error('Neočekávaná data:', data);
       return;
     }
+     // filtr
+        const filtered = allMatches.filter(m => {
+          const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+          const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
+          const cond30 = m.home_100 < 4 || m.away_100< 4;
+          return recentEnough && basicThreshold && cond30;
+        });
     let html = '<table border="1" cellpadding="5"><thead><tr>';
     ['Datum a čas', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'Home 30', 'Home 100', 'Home 300', 'Away 30', 'Away 100', 'Away 300', 'Kurz', 'Chyba počtu'].forEach(h => {
       html += `<th>${h}</th>`;
