@@ -162,8 +162,12 @@
         const filter3 = data.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
-          const cond30 = (m.home_100 < 4 && m.home_100> 0) || (m.away_100 > 0 && m.away_100< 4);
-          return recentEnough && basicThreshold && cond30;
+          const cond2 = (m.home_100 < 2 && m.home_100> 0) || (m.away_100 > 0 && m.away_100< 2);
+          const cond25 = (m.home_100 < 2.5 && m.home_100> 0 && m.kurz> 1.15) || (m.away_100 > 0 && m.away_100< 2.5  && m.kurz> 1.15);
+          const cond3 = (m.home_100 < 3 && m.home_100> 0 && m.kurz> 1.25) || (m.away_100 > 0 && m.away_100< 3  && m.kurz> 1.25);
+          const cond4 = (m.home_100 < 4 && m.home_100> 0 && m.kurz> 1.5) || (m.away_100 > 0 && m.away_100< 4  && m.kurz> 1.5);
+          
+          return recentEnough && basicThreshold && (cond2 || cond25 || cond3 || cond4);
         });
     let html = '<table border="1" cellpadding="5"><thead><tr>';
     ['Datum a čas', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'Home 30', 'Home 100', 'Home 300', 'Away 30', 'Away 100', 'Away 300', 'Kurz', 'Chyba počtu'].forEach(h => {
@@ -172,23 +176,33 @@
     html += '</tr></thead><tbody>';
 
     filter3.forEach(row => {
-      html += `<tr>
-        <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
-        <td>${row.home_name || ''}</td>
-        <td>${row.away_name || ''}</td>
-        <td>${row.h2h_30 || ''}</td>
-        <td>${row.h2h_100 || ''}</td>
-        <td>${row.h2h_300 || ''}</td>
-        <td>${row.home_30 || ''}</td>
-        <td>${row.home_100 || ''}</td>
-        <td>${row.home_300 || ''}</td>
-        <td>${row.away_30 || ''}</td>
-        <td>${row.away_100 || ''}</td>
-        <td>${row.away_300 || ''}</td>
-        <td>${row.kurz || ''}</td>
-        <td>${row.chyba_poctu || ''}</td>
-      </tr>`;
-    });
+  function colorize(value) {
+    if (value === null || value === undefined) return 'transparent';
+    if (value < 2) return '#90ee90';
+    if (value >= 2 && value < 3) return '#b4eeb4';
+    if (value >= 3 && value < 4) return '#d6f5d6';
+    if (value > 6) return '#d3d3d3';
+    return 'transparent';
+  }
+
+  html += `<tr>
+    <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
+    <td>${row.home_name || ''}</td>
+    <td>${row.away_name || ''}</td>
+    <td>${row.h2h_30 || ''}</td>
+    <td>${row.h2h_100 || ''}</td>
+    <td>${row.h2h_300 || ''}</td>
+    <td>${row.home_30 || ''}</td>
+    <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
+    <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
+    <td>${row.away_30 || ''}</td>
+    <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
+    <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
+    <td>${row.kurz || ''}</td>
+    <td>${row.chyba_poctu || ''}</td>
+  </tr>`;
+});
+
 
     html += '</tbody></table>';
     container.innerHTML = html;
