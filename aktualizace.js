@@ -181,13 +181,18 @@ async function fetchAllMatches(maxPages = 10) {
 
 app.get('/matches', async (req, res) => {
   try {
+    console.log('Fetching all matches...');
     const matches = await fetchAllMatches(10);
+    console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await insertNewMatchesToDb(matches);
+    console.log('Uložení zápasů do DB proběhlo.');
     res.json({ total: matches.length });
   } catch (err) {
+    console.error('Error in /matches:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.get('/upcoming', async (req, res) => {
   try {
