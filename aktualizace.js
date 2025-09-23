@@ -59,26 +59,7 @@ async function upsertMatchesToDb(matches) {
   const { error } = await supabase.from('ended').upsert(rows, { onConflict: ['id'] });
   if (error) console.error('❌ Chyba při vkládání ended:', error.message);
 }
-async function insertNewMatchesToDb(matches) {
-  const rows = matches.map(m => {
-    const { datum, cas } = processMatchData(m);
-    return {
-      id: m.id,
-      sport_id: m.sport_id ? Number(m.sport_id) : null,
-      time: m.time ? Number(m.time) : null,
-      league_id: m.league?.id || null,
-      league_name: m.league?.name || null,
-      home_id: m.home?.id || null,
-      home_name: m.home?.name || null,
-      away_id: m.away?.id || null,
-      away_name: m.away?.name || null,
-      datum,
-      cas,
-    };
-  });
-  const { error } = await supabase.from('ended').insert(rows, { ignoreDuplicates: true });
-  if (error) console.error('❌ Chyba při vkládání ended:', error.message);
-}
+
 
 async function clearUpcomingTable() {
   const { error } = await supabase.from('upcoming').delete().neq('id', 0);
@@ -184,7 +165,7 @@ app.get('/matches', async (req, res) => {
     console.log('Fetching all matches...');
     const matches = await fetchAllMatches(10);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
-    await insertNewMatchesToDb(matches);
+    await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
     res.json({ total: matches.length });
   } catch (err) {
