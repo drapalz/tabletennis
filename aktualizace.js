@@ -39,9 +39,10 @@ function processMatchData(m) {
   return { datum, cas };
 }
 
+// uložit zápasy do Supabase (tabulka ended)
 async function upsertMatchesToDb(matches) {
   const rows = matches.map(m => {
-    const { datum, cas } = processMatchData(m);
+    const { datum, cas, pocet_setu } = processMatchData(m);
     return {
       id: m.id,
       sport_id: m.sport_id ? Number(m.sport_id) : null,
@@ -52,12 +53,32 @@ async function upsertMatchesToDb(matches) {
       home_name: m.home?.name || null,
       away_id: m.away?.id || null,
       away_name: m.away?.name || null,
+      ss: m.ss || null,
+      pocet_setu,
       datum,
       cas,
+      score1_away: m.scores?.[1]?.away || null,
+      score1_home: m.scores?.[1]?.home || null,
+      score2_away: m.scores?.[2]?.away || null,
+      score2_home: m.scores?.[2]?.home || null,
+      score3_away: m.scores?.[3]?.away || null,
+      score3_home: m.scores?.[3]?.home || null,
+      score4_away: m.scores?.[4]?.away || null,
+      score4_home: m.scores?.[4]?.home || null,
+      score5_away: m.scores?.[5]?.away || null,
+      score5_home: m.scores?.[5]?.home || null,
     };
   });
-  const { error } = await supabase.from('ended').upsert(rows, { onConflict: ['id'] });
-  if (error) console.error('❌ Chyba při vkládání ended:', error.message);
+  try {
+    const { error } = await supabase
+      .from('ended')
+      .upsert(rows, { onConflict: ['id'] });
+    if (error) {
+      console.error('❌ Chyba při vkládání zápasů:', error.message);
+    } 
+  } catch (err) {
+    console.error('❌ Neošetřená chyba při vkládání zápasů:', err);
+  }
 }
 
 
@@ -144,7 +165,7 @@ async function fetchUpcomingMatches(maxPages = 3) {
   return allMatches;
 }
 
-async function fetchAllMatches(maxPages = 10) {
+async function fetchAllMatches(maxPages = 20) {
   let allMatches = [];
   for (let page = 1; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
