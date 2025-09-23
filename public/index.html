@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka</title>
+  <title>Setka 1</title>
   <style>
     #button-row {
       display: flex;
@@ -184,9 +184,18 @@
     if (value > 6) return '#d3d3d3';
     return 'transparent';
   }
+  function formatDateDDMMHHMM(date) {
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${day}.${month} ${hours}:${minutes}`;
+}
+
 
   html += `<tr>
-    <td>${row.cas ? new Date(row.cas).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' }) : ''}</td>
+    <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
     <td>${row.home_name || ''}</td>
     <td>${row.away_name || ''}</td>
     <td style="background-color: ${row.h2h_30 < 5 ? '#FFC0CB' : 'transparent'}">${row.h2h_30 || ''}</td>
