@@ -80,7 +80,7 @@ async function upsertMatchesToDb(matches) {
   try {
     const { error } = await supabase
       .from('ended')
-      .upsert(rows, { onConflict: ['id'] });
+      .upsert(rows, { onConflict: ['id'], ignoreDuplicates: true });
     if (error) {
       console.error('❌ Chyba při vkládání zápasů:', error.message);
     } 
