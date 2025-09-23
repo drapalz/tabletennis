@@ -184,7 +184,7 @@ async function fetchAllMatches(maxPages = 20) {
 app.get('/matches', async (req, res) => {
   try {
     console.log('Fetching all matches...');
-    const matches = await fetchAllMatches(10);
+    const matches = await fetchAllMatches(20);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
