@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>Setka2</title>
+  <title>Setka</title>
   <style>
     #button-row {
       display: flex;
@@ -193,10 +193,14 @@
     <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
     <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
     <td style="background-color: ${colorize(row.home_30)}">${row.home_30 || ''}</td>
-    <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
+    <td style="background-color: ${colorize(row.home_100)}">
+  ${row.home_100 !== null && row.home_100 !== undefined ? row.home_100 + ' (' + (row.home_100 * 1.2).toFixed(2) + ')' : ''}
+</td>
     <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
     <td style="background-color: ${colorize(row.away_30)}">${row.away_30 || ''}</td>
-    <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
+    <td style="background-color: ${colorize(row.away_100)}">
+  ${row.away_100 !== null && row.away_100 !== undefined ? row.away_100 + ' (' + (row.away_100 * 1.2).toFixed(2) + ')' : ''}
+</td>
     <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
     <td>${row.kurz || ''}</td>
     <td>${row.chyba_poctu || ''}</td>
