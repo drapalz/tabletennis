@@ -36,7 +36,15 @@ async function fetchJSON(url, retries = 5, delay = 1000) {
 function processMatchData(m) {
   const datum = m.time ? new Date(m.time * 1000).toISOString().split('T')[0] : null;
   const cas = m.time ? new Date(m.time * 1000).toISOString() : null;
-  return { datum, cas };
+   let pocet_setu = null;
+  if (m.ss) {
+    if (['0-3','1-3','2-3','3-2','3-1','3-0'].includes(m.ss)) {
+      pocet_setu = Number(m.ss[0]) + Number(m.ss[2]);      pocet_setu = Number(m.ss[0]) + Number(m.ss[2]);
+    } else if (m.ss === '2-2') {
+      pocet_setu = 5;      pocet_setu = 5;
+    }
+  }
+  return { datum, cas, pocet_setu };  
 }
 
 // uložit zápasy do Supabase (tabulka ended)
@@ -165,7 +173,7 @@ async function fetchUpcomingMatches(maxPages = 3) {
   return allMatches;
 }
 
-async function fetchAllMatches(maxPages = 9) {
+async function fetchAllMatches(maxPages = 25) {
   let allMatches = [];
   for (let page = 1; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
@@ -184,7 +192,7 @@ async function fetchAllMatches(maxPages = 9) {
 app.get('/matches', async (req, res) => {
   try {
     console.log('Fetching all matches...');
-    const matches = await fetchAllMatches(9);
+    const matches = await fetchAllMatches(25);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
