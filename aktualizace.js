@@ -182,6 +182,7 @@ async function fetchAllMatches(maxPages = 10) {
 app.get('/matches', async (req, res) => {
   try {
     const matches = await fetchAllMatches(10);
+    await insertNewMatchesToDb(matches);
     res.json({ total: matches.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
