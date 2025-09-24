@@ -170,7 +170,7 @@ for (const leagueId of LEAGUE_IDS) {
       await new Promise(r => setTimeout(r, 1000));
     }
   }
-  const { error } = await supabase.rpc('update_upcoming_stats');
+  const { error } = await supabase.rpc('update_upcoming_h2h');
   if (error) console.error('❌ Chyba update statistik:', error.message);
   console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
