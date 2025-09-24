@@ -173,9 +173,9 @@ async function fetchUpcomingMatches(maxPages = 3) {
   return allMatches;
 }
 
-async function fetchAllMatches(maxPages = 1000) {
+async function fetchAllMatches(maxPages = 1000, startPage = 100) {
   let allMatches = [];
-  for (let page = 1; page <= maxPages; page++) {
+  for (let page = startPage; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
     const apiData = await fetchJSON(url);
     const matches = apiData.results || [];
@@ -187,12 +187,13 @@ async function fetchAllMatches(maxPages = 1000) {
   return allMatches;
 }
 
+
 // Endpoints
 
 app.get('/matches', async (req, res) => {
   try {
     console.log('Fetching all matches...');
-    const matches = await fetchAllMatches(1000);
+    const matches = await fetchAllMatches(1000, 100);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
