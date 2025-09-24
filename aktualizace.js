@@ -148,7 +148,7 @@ async function updateOddsForUpcomingMatches(matches) {
     if (minHome !== null && minAway !== null) minValue = Math.min(minHome, minAway);
     else if (minHome !== null) minValue = minHome;
     else if (minAway !== null) minValue = minAway;
-
+    minValue = minValue ?? 99;
     if (minValue !== null) {
       const { error } = await supabase.from('upcoming').update({ kurz: minValue }).eq('id', match.id);
       if (error) console.error(`Chyba při aktualizaci kurzu pro ${match.id}:`, error.message);
