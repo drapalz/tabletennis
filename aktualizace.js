@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const TOKEN = '223543-zHPMwtDqu7Sduj';
 const SPORT_ID = 92;
-const LEAGUE_ID = 22307;
+const LEAGUE_ID = 29128;
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
@@ -173,7 +173,7 @@ async function fetchUpcomingMatches(maxPages = 3) {
   return allMatches;
 }
 
-async function fetchAllMatches(maxPages = 8) {
+async function fetchAllMatches(maxPages = 1000) {
   let allMatches = [];
   for (let page = 1; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
@@ -192,7 +192,7 @@ async function fetchAllMatches(maxPages = 8) {
 app.get('/matches', async (req, res) => {
   try {
     console.log('Fetching all matches...');
-    const matches = await fetchAllMatches(8);
+    const matches = await fetchAllMatches(1000);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
