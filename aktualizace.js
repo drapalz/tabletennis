@@ -173,7 +173,7 @@ async function fetchUpcomingMatches(maxPages = 3) {
   return allMatches;
 }
 
-async function fetchAllMatches(maxPages = 1000, startPage = 100) {
+async function fetchAllMatches(maxPages = 1000, startPage = 250) {
   let allMatches = [];
   for (let page = startPage; page <= maxPages; page++) {
     const url = `https://api.b365api.com/v3/events/ended?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${LEAGUE_ID}&per_page=100&page=${page}`;
@@ -193,7 +193,7 @@ async function fetchAllMatches(maxPages = 1000, startPage = 100) {
 app.get('/matches', async (req, res) => {
   try {
     console.log('Fetching all matches...');
-    const matches = await fetchAllMatches(1000, 100);
+    const matches = await fetchAllMatches(1000, 250);
     console.log(`Načteno ${matches.length} zápasů, ukládám do DB...`);
     await upsertMatchesToDb(matches);
     console.log('Uložení zápasů do DB proběhlo.');
@@ -254,7 +254,7 @@ app.get('/api/filter-3-0', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('upcoming')
-      .select('home_name, away_name, cas, h2h_30,h2h_100, h2h_300, home_30, home_100, home_300, away_30, away_100, away_300, chyba_poctu, kurz')
+      .select('home_name, away_name, league_name, cas, h2h_30,h2h_100, h2h_300, home_30, home_100, home_300, away_30, away_100, away_300, chyba_poctu, kurz')
       .order('cas', { ascending: true });
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
