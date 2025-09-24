@@ -170,8 +170,21 @@ for (const leagueId of LEAGUE_IDS) {
       await new Promise(r => setTimeout(r, 1000));
     }
   }
-  const { error } = await supabase.rpc('update_upcoming_h2h');
-  if (error) console.error('❌ Chyba update statistik:', error.message);
+const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+
+  for (const fnName of functionsToRun) {
+    try {
+      const { error } = await supabase.rpc(fnName);
+      if (error) {
+        console.error(`❌ Chyba při spuštění funkce ${fnName}:`, error.message);
+        // případně throw new Error pokud chcete přerušit zpracování
+      } else {
+        console.log(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
+      }
+    } catch (err) {
+      console.error(`❌ Výjimka při volání funkce ${fnName}:`, err.message);
+    }
+  }
   console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
