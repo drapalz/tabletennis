@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 1.5</title>
+  <title>TT 2.0</title>
   <style>
     #button-row {
       display: flex;
@@ -75,16 +75,22 @@
     document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
       const output = document.getElementById('output-upcoming');
       output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
-      try {
-        const res = await fetch('/upcoming');
-        if (!res.ok) throw new Error('Chyba serveru');
-        const data = await res.json();
-        output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
-      } catch (e) {
-        output.textContent = `Chyba: ${e.message}`;
-      }
-    });
-
+      const controller = new AbortController();
+     const timeoutId = setTimeout(() => controller.abort(), 10000);
+     ry {
+    const res = await fetch('/upcoming', { signal: controller.signal });
+    clearTimeout(timeoutId); // zruší timeout při úspěchu
+    if (!res.ok) throw new Error('Chyba serveru');
+    const data = await res.json();
+    output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      output.textContent = 'Chyba: Timeout - server neodpověděl včas.';
+    } else {
+      output.textContent = `Chyba: ${e.message}`;
+    }
+  }
+});
     document.getElementById('update-odds-btn').addEventListener('click', async () => {
       const output = document.getElementById('output-odds');
       output.textContent = 'Aktualizuji kurzy...';
