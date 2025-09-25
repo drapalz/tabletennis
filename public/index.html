@@ -77,7 +77,7 @@
       output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
       const controller = new AbortController();
      const timeoutId = setTimeout(() => controller.abort(), 10000);
-     ry {
+     try {
     const res = await fetch('/upcoming', { signal: controller.signal });
     clearTimeout(timeoutId); // zruší timeout při úspěchu
     if (!res.ok) throw new Error('Chyba serveru');
