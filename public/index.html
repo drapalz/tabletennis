@@ -183,7 +183,7 @@ html += '</tr></thead><tbody>';
     ];
     headers.forEach(h => {
       if (h === '') {
-        html += '<th style="border-left: 4px solid blue;"></th>'; // vizuální oddělovač
+       html += `<th style="width: 4px; padding: 0; border-left:4px solid blue;"></th>`;
       } else {
         html += `<th>${h}</th>`;
       }
