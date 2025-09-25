@@ -25,7 +25,7 @@
   </style>
 </head>
 <body>
-  <h1>Setka 3:0</h1>
+  <h1>TT 3:0</h1>
   <div id="button-row">
     <button id="upload-ended-btn">Nahrej do ended</button>
     <button id="upload-upcoming-btn">Nahraj do upcoming</button>
@@ -162,10 +162,10 @@
         const filter3 = data.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
-          const cond2 = (m.home_100 < 2 && m.home_100> 0) || (m.away_100 > 0 && m.away_100< 2);
-          const cond25 = (m.home_100 < 2.5 && m.home_100> 0 && m.kurz> 1.15) || (m.away_100 > 0 && m.away_100< 2.5  && m.kurz> 1.15);
-          const cond3 = (m.home_100 < 3.3 && m.home_100> 0 && m.kurz> 1.25) || (m.away_100 > 0 && m.away_100< 3.3  && m.kurz> 1.25);
-          const cond4 = (m.home_100 < 4 && m.home_100> 0 && m.kurz> 1.54) || (m.away_100 > 0 && m.away_100< 4  && m.kurz> 1.54);
+          const cond2 = (m.home_100 < 2 && m.home_100> 0 && m.home_300< 4) || (m.away_100 > 0 && m.away_100< 2 && m.away_300< 4);
+          const cond25 = (m.home_100 < 2.5 && m.home_100> 0 && m.kurz> 1.15 && m.home_300< 5) || (m.away_100 > 0 && m.away_100< 2.5  && m.kurz> 1.15 && m.away_300< 5);
+          const cond3 = (m.home_100 < 3.3 && m.home_100> 0 && m.kurz> 1.25 && m.home_300< 6) || (m.away_100 > 0 && m.away_100< 3.3  && m.kurz> 1.25 && m.away_300< 6);
+          const cond4 = (m.home_100 < 4 && m.home_100> 0 && m.kurz> 1.54 && m.home_300< 7) || (m.away_100 > 0 && m.away_100< 4  && m.kurz> 1.54 && m.away_300< 7);
           
           return recentEnough && basicThreshold && (cond2 || cond25 || cond3 || cond4);
         });
