@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 1.1</title>
+  <title>TT 1.2</title>
   <style>
     #button-row {
       display: flex;
@@ -120,10 +120,17 @@
           return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
         });
         let html = '<table border="1" cellpadding="5"><thead><tr>';
-        ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35 100', '45 100', 'H2H 300', '35 300', '45 300', 'Kurz', 'Chyby'].forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += '</tr></thead><tbody>';
+const headers = ['Datum a čas', 'Liga', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'H 30', 'Home 100', 'H 300',  'A 30', 'Away 100', 'A 300',  'Kurz', 'Chyb'];
+
+headers.forEach(h => {
+  if (h === '') {
+    html += `<th style="border-left: 4px solid blue;"></th>`; // Oddělovač ve hlavičce
+  } else {
+    html += `<th>${h}</th>`;
+  }
+});
+html += '</tr></thead><tbody>';
+
         filtered.forEach(row => {
           html += `<tr>
             <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
@@ -169,9 +176,17 @@
           
           return recentEnough && basicThreshold && (cond2 || cond25 || cond3 || cond4);
         });
-    let html = '<table border="1" cellpadding="5"><thead><tr>';
-    ['Datum a čas', 'Liga', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'H 30', 'Home 100', 'H 300', 'A 30', 'Away 100', 'A 300', 'Kurz', 'Chyb'].forEach(h => {
-      html += `<th>${h}</th>`;
+   let html = '<table border="1" cellpadding="5"><thead><tr>';
+    const headers = [
+      'Datum a čas', 'Liga', 'Domácí', 'Hosté',
+      'H2H 30', 'H2H 100', 'H2H 300', '','H 30', 'Home 100', 'H 300', '', 'A 30', 'Away 100', 'A 300', '', 'Kurz', 'Chyb'
+    ];
+    headers.forEach(h => {
+      if (h === '') {
+        html += '<th style="border-left: 4px solid blue;"></th>'; // vizuální oddělovač
+      } else {
+        html += `<th>${h}</th>`;
+      }
     });
     html += '</tr></thead><tbody>';
 
@@ -207,7 +222,7 @@
    <td style="background-color: ${isH2h30Low ? '#FFFFE0' : colorize(row.home_30)}">${isH2h30Low ? '---' : (row.home_30 || '')}</td>
     <td style="background-color: ${colorize(row.home_100)}">
   ${row.home_100 !== null && row.home_100 !== undefined ? row.home_100 + ' (' + (row.home_100 * 1.2).toFixed(2) + ')' : ''}
-</td>
+  </td>
     <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
     <td style="border-left: 4px solid blue;"></td>
     <td style="background-color: ${isH2h30Low ? '#FFFFE0' : colorize(row.away_30)}">${isH2h30Low ? '---' : (row.away_30 || '')}</td>
