@@ -156,7 +156,7 @@ async function updateOddsForUpcomingMatches(matches) {
   }
 }
 
-async function fetchUpcomingMatches(maxPages = 3) {
+async function fetchUpcomingMatches(maxPages = 1) {
   await clearUpcomingTable();
   let allMatches = [];
 for (const leagueId of LEAGUE_IDS) {
@@ -225,7 +225,7 @@ app.get('/matches', async (req, res) => {
 
 app.get('/upcoming', async (req, res) => {
   try {
-    const matches = await fetchUpcomingMatches(3);
+    const matches = await fetchUpcomingMatches(1);
     res.json({ total: matches.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
