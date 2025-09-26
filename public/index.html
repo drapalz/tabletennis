@@ -48,15 +48,22 @@
         if (!res.ok) throw new Error('Chyba serveru');
         const data = await res.json();
         if (data.maxTimeISO) {
-          const dateStr = new Date(data.maxTimeISO).toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' });
-          output.textContent = `Maximální čas ze tabulky ended je: ${dateStr}`;
-        } else {
-          output.textContent = 'Žádná data nebyla nalezena.';
-        }
-      } catch (err) {
-        output.textContent = `Chyba: ${err.message}`;
-      }
+        const maxTime = new Date(data.maxTimeISO);
+      const now = new Date();
+
+      // Výpočet rozdílu v hodinách s 1 desetinným místem
+      const diffMs = now - maxTime;
+      const diffHours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
+
+      const dateStr = maxTime.toLocaleString('cs-CZ', { timeZone: 'Europe/Prague' });
+      output.textContent = `Maximální čas ze tabulky ended je: ${dateStr} (před ${diffHours} hodinami)`;
+    } else {
+      output.textContent = 'Žádná data nebyla nalezena.';
     }
+  } catch (err) {
+    output.textContent = `Chyba: ${err.message}`;
+  }
+}
     window.addEventListener('DOMContentLoaded', loadMaxEndedTime);
 
     document.getElementById('upload-ended-btn').addEventListener('click', async () => {
@@ -126,7 +133,7 @@
           return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
         });
         let html = '<table border="1" cellpadding="5"><thead><tr>';
-const headers = ['Datum a čas', 'Liga', 'Domácí', 'Hosté', 'H2H 30', 'H2H 100', 'H2H 300', 'H 30', 'Home 100', 'H 300',  'A 30', 'Away 100', 'A 300',  'Kurz', 'Chyb'];
+const headers = ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35_100', '45_100', 'H2H 300', '35_300', '45_100','Kurz', 'Chyb'];
 
 headers.forEach(h => {
   if (h === '') {
