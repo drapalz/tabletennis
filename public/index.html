@@ -184,7 +184,7 @@ html += '</tr></thead><tbody>';
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
           const cond2 = (m.home_100 < 2 && m.home_100> 0 && m.home_300< 5) || (m.away_100 > 0 && m.away_100< 2 && m.away_300< 5);
           const cond25 = (m.home_100 < 2.5 && m.home_100> 0 && m.kurz> 1.2 && m.home_300< 4) || (m.away_100 > 0 && m.away_100< 2.5  && m.kurz> 1.2 && m.away_300< 4);
-          const cond3 = (m.home_100 < 3.3 && m.home_100> 0 && m.kurz> 1.31 && m.home_300< 4.5) || (m.away_100 > 0 && m.away_100< 3.3  && m.kurz> 1.31 && m.away_300< 4.5);
+          const cond3 = (m.home_100 < 3.3 && m.home_100> 0 && m.kurz> 1.33 && m.home_300< 4.5) || (m.away_100 > 0 && m.away_100< 3.3  && m.kurz> 1.33 && m.away_300< 4.5);
           const cond4 = (m.home_100 < 4 && m.home_100> 0 && m.kurz> 1.54 && m.home_300< 5.2) || (m.away_100 > 0 && m.away_100< 4  && m.kurz> 1.54 && m.away_300< 5.2);
           
           return recentEnough && basicThreshold && (cond2 || cond25 || cond3 || cond4);
