@@ -37,15 +37,13 @@ async function fetchJSON(url, retries = 5, delay = 1000) {
 function processMatchData(m) {
   const datum = m.time ? new Date(m.time * 1000).toISOString().split('T')[0] : null;
   const cas = m.time ? new Date(m.time * 1000).toISOString() : null;
-   let pocet_setu = null;
+  let pocet_setu = null;
   if (m.ss) {
-    if (['0-3','1-3','2-3','3-2','3-1','3-0'].includes(m.ss)) {
-      pocet_setu = Number(m.ss[0]) + Number(m.ss[2]);      pocet_setu = Number(m.ss[0]) + Number(m.ss[2]);
-    } else if (m.ss === '2-2') {
-      pocet_setu = 5;      pocet_setu = 5;
+    if (['0-3', '1-3', '2-3', '3-2', '3-1', '3-0'].includes(m.ss)) {
+      pocet_setu = Number(m.ss[0]) + Number(m.ss[2]);
     }
   }
-  return { datum, cas, pocet_setu };  
+  return { datum, cas, pocet_setu };
 }
 
 // uložit zápasy do Supabase (tabulka ended)
