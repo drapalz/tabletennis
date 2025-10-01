@@ -227,11 +227,23 @@ app.get('/matches', async (req, res) => {
 app.get('/upcoming', async (req, res) => {
   try {
     const matches = await fetchUpcomingMatches(1);
-    res.json({ total: matches.length });
+
+    // Navrácení i zpráv o spuštění funkcí (pokud chcete v UI zobrazovat)
+    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+    const messages = [];
+
+    for (const fnName of functionsToRun) {
+      const { error } = await supabase.rpc(fnName);
+      if (error) messages.push(`❌ Chyba při spuštění funkce ${fnName}: ${error.message}`);
+      else messages.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
+    }
+
+    res.json({ total: matches.length, messages });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.get('/update-odds', async (req, res) => {
   try {
@@ -277,20 +289,13 @@ app.get('/api/filter-3-0', async (req, res) => {
       .order('cas', { ascending: true });
     if (error) return res.status(500).json({ error: error.message });
 
-    // zde přidáme zprávy o spuštění funkcí
-    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
-    const messages = [];
-    for (const fnName of functionsToRun) {
-      const { error } = await supabase.rpc(fnName);
-      if (error) messages.push(`❌ Chyba při spuštění funkce ${fnName}: ${error.message}`);
-      else messages.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
-    }
-
-    res.json({ matches: data, messages });
+    // Nenastavovat a nespouštět žádné backendové funkce zde
+    res.json({ matches: data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
