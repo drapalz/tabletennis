@@ -276,7 +276,17 @@ app.get('/api/filter-3-0', async (req, res) => {
       .select('home_name, away_name, league_name, cas, h2h_30,h2h_100, h2h_300, home_30, home_100, home_300, away_30, away_100, away_300, chyba_poctu, kurz')
       .order('cas', { ascending: true });
     if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
+
+    // zde přidáme zprávy o spuštění funkcí
+    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+    const messages = [];
+    for (const fnName of functionsToRun) {
+      const { error } = await supabase.rpc(fnName);
+      if (error) messages.push(`❌ Chyba při spuštění funkce ${fnName}: ${error.message}`);
+      else messages.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
+    }
+
+    res.json({ matches: data, messages });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
