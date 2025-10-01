@@ -171,12 +171,13 @@ for (const leagueId of LEAGUE_IDS) {
 const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
 const results = [];
   
- for (const fnName of functionsToRun) {
+for (const fnName of functionsToRun) {
   try {
-    const { error } = await supabase.rpc(fnName);
-    if (error) {
-      console.error(`❌ Chyba při spuštění funkce ${fnName}:`, error.message);
-      results.push(`❌ Chyba při spuštění funkce ${fnName}: ${error.message}`);
+    const rpcResult = await supabase.rpc(fnName);
+    console.log(`Výsledek volání ${fnName}:`, rpcResult);
+    if (rpcResult.error) {
+      console.error(`❌ Chyba při spuštění funkce ${fnName}:`, rpcResult.error.message);
+      results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error.message}`);
     } else {
       console.log(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
       results.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
@@ -186,6 +187,7 @@ const results = [];
     results.push(`❌ Výjimka při volání funkce ${fnName}: ${err.message}`);
   }
 }
+
   console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
   return allMatches;
 }
