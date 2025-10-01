@@ -80,23 +80,22 @@
       }
     });
 
-    document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
-      const output = document.getElementById('output-upcoming');
-      output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
-      const controller = new AbortController();
-     const timeoutId = setTimeout(() => controller.abort(), 30000);
-     try {
-    const res = await fetch('/upcoming', { signal: controller.signal });
-    clearTimeout(timeoutId); // zruší timeout při úspěchu
+document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
+  const output = document.getElementById('output-upcoming');
+  output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
+  try {
+    const res = await fetch('/upcoming');
     if (!res.ok) throw new Error('Chyba serveru');
     const data = await res.json();
-    output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
-  } catch (e) {
-    if (e.name === 'AbortError') {
-      output.textContent = 'Chyba: Timeout - server neodpověděl včas.';
+
+    // Předpokládejme, že data obsahují i zprávy o spuštění funkcí
+    if (data.messages && data.messages.length > 0) {
+      output.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
     } else {
-      output.textContent = `Chyba: ${e.message}`;
+      output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
     }
+  } catch (e) {
+    output.textContent = `Chyba: ${e.message}`;
   }
 });
     document.getElementById('update-odds-btn').addEventListener('click', async () => {
@@ -166,18 +165,16 @@ html += '</tr></thead><tbody>';
         container.innerHTML = `Chyba: ${error.message}`;
       }
     });
-
-   document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
+document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
   const container = document.getElementById('filtered-table');
   const messageContainer = document.getElementById('statusMessages');
   container.innerHTML = 'Načítám data...';
   messageContainer.innerHTML = '';
-
   try {
     const response = await fetch('/api/filter-3-0');
     if (!response.ok) throw new Error('Chyba serveru při načítání dat');
     const data = await response.json();
-    
+
     if (!Array.isArray(data.matches)) {
       container.innerHTML = 'Neočekávaná odpověď ze serveru.';
       console.error('Neočekávaná data:', data);
