@@ -36,6 +36,7 @@
   <div id="output-ended"></div>
   <div id="output-upcoming"></div>
   <div id="output-odds"></div>
+  <div id="statusMessages" style="margin-bottom: 10px; color: green;"></div>
   <div id="filtered-table"></div>
   <div id="max-time-display"></div>
 
@@ -168,18 +169,26 @@ html += '</tr></thead><tbody>';
 
    document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
   const container = document.getElementById('filtered-table');
+  const messageContainer = document.getElementById('statusMessages');
   container.innerHTML = 'Načítám data...';
+  messageContainer.innerHTML = '';
+
   try {
     const response = await fetch('/api/filter-3-0');
     if (!response.ok) throw new Error('Chyba serveru při načítání dat');
     const data = await response.json();
-    if (!Array.isArray(data)) {
+    
+    if (!Array.isArray(data.matches)) {
       container.innerHTML = 'Neočekávaná odpověď ze serveru.';
       console.error('Neočekávaná data:', data);
       return;
     }
+
+    if (data.messages && data.messages.length > 0) {
+      messageContainer.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+    }
      // filtr
-        const filter3 = data.filter(m => {
+        const filter3 = data.mathes.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
           const cond2 = (m.home_100 < 2 && m.home_100> 0 && m.home_300< 5) || (m.away_100 > 0 && m.away_100< 2 && m.away_300< 5);
