@@ -188,7 +188,7 @@ html += '</tr></thead><tbody>';
       messageContainer.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
     }
      // filtr
-        const filter3 = data.mathes.filter(m => {
+        const filter3 = data.matches.filter(m => {
           const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
           const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
           const cond2 = (m.home_100 < 2 && m.home_100> 0 && m.home_300< 5) || (m.away_100 > 0 && m.away_100< 2 && m.away_300< 5);
