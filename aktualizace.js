@@ -228,26 +228,37 @@ app.get('/matches', async (req, res) => {
   }
 });
 
-
 app.get('/upcoming', async (req, res) => {
+  console.log('START /upcoming route');
   try {
     const matches = await fetchUpcomingMatches(1);
+    console.log('Nalezeno zápasů:', matches.length);
 
-    // Navrácení i zpráv o spuštění funkcí (pokud chcete v UI zobrazovat)
     const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
-    const messages = [];
+    const results = [];
+
+    console.log('Volám funkce:', functionsToRun);
 
     for (const fnName of functionsToRun) {
-      const { error } = await supabase.rpc(fnName);
-      if (error) messages.push(`❌ Chyba při spuštění funkce ${fnName}: ${error.message}`);
-      else messages.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
+      console.log(`Volám rpc funkci ${fnName}`);
+      const rpcResult = await supabase.rpc(fnName);
+      console.log(`Výsledek ${fnName}:`, rpcResult);
+
+      if (rpcResult.error || rpcResult.status >= 400) {
+        console.error(`❌ Chyba při spuštění funkce ${fnName}:`, rpcResult.error?.message || 'Neznámá chyba');
+        results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error?.message || 'Neznámá chyba'}`);
+      } else {
+        results.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
+      }
     }
 
-    res.json({ total: matches.length, messages });
+    res.json({ total: matches.length, messages: results });
   } catch (err) {
+    console.error('Chyba v /upcoming:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 app.get('/update-odds', async (req, res) => {
