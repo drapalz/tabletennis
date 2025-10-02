@@ -82,22 +82,30 @@
 
 document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
   const output = document.getElementById('output-upcoming');
+  const statusMessages = document.getElementById('statusMessages');
   output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
+  statusMessages.textContent = ''; // vyčistit případné staré zprávy
   try {
     const res = await fetch('/upcoming');
     if (!res.ok) throw new Error('Chyba serveru');
     const data = await res.json();
 
-    // Předpokládejme, že data obsahují i zprávy o spuštění funkcí
     if (data.messages && data.messages.length > 0) {
-      output.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+      // zobrazit chybové i úspěšné zprávy přehledně
+      statusMessages.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
     } else {
+      statusMessages.textContent = 'Žádné zprávy z backendu.';
+    }
+
+    if (data.total) {
       output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
     }
+
   } catch (e) {
     output.textContent = `Chyba: ${e.message}`;
   }
 });
+
     document.getElementById('update-odds-btn').addEventListener('click', async () => {
       const output = document.getElementById('output-odds');
       output.textContent = 'Aktualizuji kurzy...';
