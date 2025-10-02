@@ -175,18 +175,18 @@ for (const fnName of functionsToRun) {
   try {
     const rpcResult = await supabase.rpc(fnName);
     console.log(`Výsledek volání ${fnName}:`, rpcResult);
-    if (rpcResult.error) {
-      console.error(`❌ Chyba při spuštění funkce ${fnName}:`, rpcResult.error.message);
-      results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error.message}`);
+    if (rpcResult.error || rpcResult.status >= 400) {
+      console.error(`❌ Chyba při spuštění funkce ${fnName}:`, rpcResult.error?.message || 'Neznámá chyba');
+      results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error?.message || 'Neznámá chyba'}`);
     } else {
       results.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
-      console.log(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
     }
   } catch (err) {
     console.error(`❌ Výjimka při volání funkce ${fnName}:`, err.message);
     results.push(`❌ Výjimka při volání funkce ${fnName}: ${err.message}`);
   }
 }
+
 
 res.json({ messages: results });
 
