@@ -229,32 +229,24 @@ app.get('/matches', async (req, res) => {
 });
 
 app.get('/upcoming', async (req, res) => {
-  console.log('START /upcoming route');
   try {
     const matches = await fetchUpcomingMatches(1);
-    console.log('Nalezeno zápasů:', matches.length);
-
-    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
     const results = [];
 
-    console.log('Volám funkce:', functionsToRun);
-
+    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
     for (const fnName of functionsToRun) {
-      console.log(`Volám rpc funkci ${fnName}`);
       const rpcResult = await supabase.rpc(fnName);
-      console.log(`Výsledek ${fnName}:`, rpcResult);
-
       if (rpcResult.error || rpcResult.status >= 400) {
-        console.error(`❌ Chyba při spuštění funkce ${fnName}:`, rpcResult.error?.message || 'Neznámá chyba');
-        results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error?.message || 'Neznámá chyba'}`);
+        results.push(`❌ Chyba při spuštění funkce ${fnName}: ${rpcResult.error?.message}`);
       } else {
         results.push(`✅ Funkce ${fnName} byla spuštěna úspěšně.`);
       }
     }
 
+    // POZOR: tento res je jen v route handleru
     res.json({ total: matches.length, messages: results });
   } catch (err) {
-    console.error('Chyba v /upcoming:', err);
+    // Tento res je také v route handleru
     res.status(500).json({ error: err.message });
   }
 });
