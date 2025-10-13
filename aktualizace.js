@@ -157,7 +157,8 @@ async function updateOddsForUpcomingMatches(matches) {
 async function fetchUpcomingMatches(maxPages = 1) {
   await clearUpcomingTable();
   let allMatches = [];
-for (const leagueId of LEAGUE_IDS) {
+
+  for (const leagueId of LEAGUE_IDS) {
     for (let page = 1; page <= maxPages; page++) {
       const url = `https://api.b365api.com/v3/events/upcoming?sport_id=${SPORT_ID}&token=${TOKEN}&league_id=${leagueId}&per_page=100&page=${page}`;
       const apiData = await fetchJSON(url);
@@ -168,6 +169,11 @@ for (const leagueId of LEAGUE_IDS) {
       await new Promise(r => setTimeout(r, 1000));
     }
   }
+
+  console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
+  return allMatches;
+}
+
 const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
 const results = [];
 
@@ -231,9 +237,10 @@ app.get('/matches', async (req, res) => {
 app.get('/upcoming', async (req, res) => {
   try {
     const matches = await fetchUpcomingMatches(1);
-    const results = [];
 
     const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+    const results = [];
+
     for (const fnName of functionsToRun) {
       const rpcResult = await supabase.rpc(fnName);
       if (rpcResult.error || rpcResult.status >= 400) {
@@ -243,10 +250,8 @@ app.get('/upcoming', async (req, res) => {
       }
     }
 
-    // POZOR: tento res je jen v route handleru
     res.json({ total: matches.length, messages: results });
   } catch (err) {
-    // Tento res je také v route handleru
     res.status(500).json({ error: err.message });
   }
 });
