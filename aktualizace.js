@@ -170,11 +170,7 @@ async function fetchUpcomingMatches(maxPages = 1) {
     }
   }
 
-  console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
-  return allMatches;
-}
-
-const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+ const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
 const results = [];
 
 for (const fnName of functionsToRun) {
@@ -193,8 +189,6 @@ for (const fnName of functionsToRun) {
   }
 }
 
-
-res.json({ messages: results });
 
 
   console.log(`✅ Načteno ${allMatches.length} upcoming zápasů`);
