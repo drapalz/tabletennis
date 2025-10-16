@@ -261,8 +261,8 @@ document.getElementById('forehand-filter-btn').addEventListener('click', async (
     <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
     <td>${row.kurz || ''}</td>
     <td style="background-color: ${
-  row.kurz_min_30 * 1.1 > row.kurz ? '#FFFFE0' :  // větší než kurz*1,1 => světle žlutá
   row.kurz_min_30 > row.kurz ? '#FFC0CB' :         // větší než kurz => růžová
+  row.kurz_min_30 * 1.1 > row.kurz ? '#FFFFE0' :  // větší než kurz*1,1 => světle žlutá
   row.kurz_min_30 < row.kurz / 1.25 ? '#ADD8E6' :   // menší než kurz/1,3 => světle modrá
   'transparent'                                    // jinak bez barvy
 }">${row.kurz_min_30 || ''}</td>
