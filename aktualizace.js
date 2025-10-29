@@ -101,7 +101,7 @@ async function upsertMatchesToUpcomingDb(matches) {
     let casWithOffset = null;
     if (cas) {
       const d = new Date(cas);
-      d.setHours(d.getHours() + 2);
+      d.setHours(d.getHours() + 1);
       casWithOffset = d.toISOString();
     }
     return {
