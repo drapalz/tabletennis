@@ -170,7 +170,7 @@ async function fetchUpcomingMatches(maxPages = 1) {
     }
   }
 
- const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+ const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30', 'update_upcoming_sety'];
 const results = [];
 
 for (const fnName of functionsToRun) {
@@ -232,7 +232,7 @@ app.get('/upcoming', async (req, res) => {
   try {
     const matches = await fetchUpcomingMatches(1);
 
-    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30'];
+    const functionsToRun = ['update_upcoming_h2h', 'update_upcoming_30', 'update_upcoming_sety'];
     const results = [];
 
     for (const fnName of functionsToRun) {
