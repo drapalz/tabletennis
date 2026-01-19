@@ -32,6 +32,7 @@
     <button id="update-odds-btn">Dopln kurz</button>
     <button id="filter-btn">Zobrazit budoucí zápasy</button>
     <button id="forehand-filter-btn">FILTR 3:0</button>
+    <button id="sety-filter-btn">SETY</button>
   </div>
   <div id="output-ended"></div>
   <div id="output-upcoming"></div>
@@ -276,7 +277,190 @@ document.getElementById('forehand-filter-btn').addEventListener('click', async (
     container.innerHTML = `Chyba: ${error.message}`;
   }
 });
+// NOVÝ EVENT LISTENER PRO SETY
+document.getElementById('sety-filter-btn').addEventListener('click', async () => {
+  const container = document.getElementById('filtered-table');
+  const messageContainer = document.getElementById('statusMessages');
+  container.innerHTML = 'Načítám data SETY...';
+  messageContainer.innerHTML = '';
+  
+  try {
+    const response = await fetch('/api/filter-sety');
+    if (!response.ok) throw new Error('Chyba serveru při načítání dat SETY');
+    const data = await response.json();
 
+    if (!Array.isArray(data.matches)) {
+      container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+      console.error('Neočekávaná data:', data);
+      return;
+    }
+
+    if (data.messages && data.messages.length > 0) {
+      messageContainer.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+    }
+
+    // Zde přidejte filtr pro SETY podle vašich požadavků
+    // Například podobný jako u 3:0 filtru:
+    const filteredSets = data.matches.filter(m => {
+      // PŘIDEJTE SEM VAŠE SPECIFICKÉ PODMÍNKY PRO SETY
+      const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+      // Příklad podmínek - upravte podle potřeby
+      const basicThreshold = m.h2h_100 > 8;
+      return recentEnough && basicThreshold;
+    });
+
+    let html = '<table border="1" cellpadding="5"><thead><tr>';
+    // Upravte hlavičky podle dat z /api/filter-sety
+    const headers = [
+      'Datum a čas', 'Liga', 'Domácí', 'Hosté',
+      'H2H 100', 'H2H 300', '', 'Home 100', 'Home 300', '', 'Away 100', 'Away 300', '', 'Kurz'
+    ];
+
+    headers.forEach(h => {
+      if (h === '') {
+        html += `<th style="width: 4px; padding: 0; border-left:4px solid blue;"></th>`;
+      } else {
+        html += `<th>${h}</th>`;
+      }
+    });
+    html += '</tr></thead><tbody>';
+
+    filteredSets.forEach(row => {
+      // Funkce pro barvení (stejné jako u 3:0)
+      function colorize(value) {
+        if (value === null || value === undefined) return 'transparent';
+        if (value < 1.5) return '#90ee90';
+        if (value > 10) return '#d3d3d3';
+        return 'transparent';
+      }
+
+      function formatDateDDMMHHMM(date) {
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${day}.${month} ${hours}:${minutes}`;
+      }
+
+      html += `<tr>
+        <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
+        <td>${row.league_name || ''}</td>
+        <td>${row.home_name || ''}</td>
+        <td>${row.away_name || ''}</td>
+        <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+        <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
+        <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
+        <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td>${row.kurz || ''}</td>
+      </tr>`;
+    });
+// NOVÝ EVENT LISTENER PRO SETY
+document.getElementById('sety-filter-btn').addEventListener('click', async () => {
+  const container = document.getElementById('filtered-table');
+  const messageContainer = document.getElementById('statusMessages');
+  container.innerHTML = 'Načítám data SETY...';
+  messageContainer.innerHTML = '';
+  
+  try {
+    const response = await fetch('/api/filter-sety');
+    if (!response.ok) throw new Error('Chyba serveru při načítání dat SETY');
+    const data = await response.json();
+
+    if (!Array.isArray(data.matches)) {
+      container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+      console.error('Neočekávaná data:', data);
+      return;
+    }
+
+    if (data.messages && data.messages.length > 0) {
+      messageContainer.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+    }
+
+    // Zde přidejte filtr pro SETY podle vašich požadavků
+    // Například podobný jako u 3:0 filtru:
+    const filteredSets = data.matches.filter(m => {
+      // PŘIDEJTE SEM VAŠE SPECIFICKÉ PODMÍNKY PRO SETY
+      const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+      // Příklad podmínek - upravte podle potřeby
+      const basicThreshold = m.h2h_100 > 8;
+      return recentEnough && basicThreshold;
+    });
+
+    let html = '<table border="1" cellpadding="5"><thead><tr>';
+    // Upravte hlavičky podle dat z /api/filter-sety
+    const headers = [
+      'Datum a čas', 'Liga', 'Domácí', 'Hosté',
+      'H2H 100', 'H2H 300', '', 'Home 100', 'Home 300', '', 'Away 100', 'Away 300', '', 'Kurz'
+    ];
+
+    headers.forEach(h => {
+      if (h === '') {
+        html += `<th style="width: 4px; padding: 0; border-left:4px solid blue;"></th>`;
+      } else {
+        html += `<th>${h}</th>`;
+      }
+    });
+    html += '</tr></thead><tbody>';
+
+    filteredSets.forEach(row => {
+      // Funkce pro barvení (stejné jako u 3:0)
+      function colorize(value) {
+        if (value === null || value === undefined) return 'transparent';
+        if (value < 1.5) return '#90ee90';
+        if (value > 6) return '#d3d3d3';
+        return 'transparent';
+      }
+
+      function formatDateDDMMHHMM(date) {
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${day}.${month} ${hours}:${minutes}`;
+      }
+
+      html += `<tr>
+        <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
+        <td>${row.league_name || ''}</td>
+        <td>${row.home_name || ''}</td>
+        <td>${row.away_name || ''}</td>
+        <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+        <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
+        <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
+        <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
+        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+        <td>${row.kurz || ''}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `Chyba: ${error.message}`;
+  }
+});
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `Chyba: ${error.message}`;
+  }
+});
+
+    
   </script>
 </body>
 </html>
