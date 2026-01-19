@@ -353,22 +353,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
         return `${day}.${month} ${hours}:${minutes}`;
       }
 
-      html += `<tr>
-        <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
-        <td>${row.league_name || ''}</td>
-        <td>${row.home_name || ''}</td>
-        <td>${row.away_name || ''}</td>
-        <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
-        <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
-        <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
-        <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td>${row.kurz || ''}</td>
-      </tr>`;
+      
     });
 // NOVÝ EVENT LISTENER PRO SETY
 document.getElementById('sety-filter-btn').addEventListener('click', async () => {
@@ -436,22 +421,27 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
         return `${day}.${month} ${hours}:${minutes}`;
       }
 
-      html += `<tr>
-        <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
-        <td>${row.league_name || ''}</td>
-        <td>${row.home_name || ''}</td>
-        <td>${row.away_name || ''}</td>
-        <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
-        <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td style="background-color: ${colorize(row.home_100)}">${row.home_100 || ''}</td>
-        <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td style="background-color: ${colorize(row.away_100)}">${row.away_100 || ''}</td>
-        <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
-        <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
-        <td>${row.kurz || ''}</td>
-      </tr>`;
+       html += `<tr>
+    <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
+    <td>${row.league_name || ''}</td>
+    <td>${row.home_name || ''}</td>
+    <td>${row.away_name || ''}</td>
+    <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+    <td style="background-color: ${colorize(row.sety_100)}">${row.sety_100 || ''}</td>
+    <td style="background-color: ${colorize(row.u17_100)}">${row.u17_100 || ''}</td>
+    <td style="background-color: ${colorize(row.u18_100)}">${row.u18_100 || ''}</td>
+    <td style="background-color: ${colorize(row.u19_100)}">${row.u19_100 || ''}</td>
+    <td style="background-color: ${colorize(row.u20_100)}">${row.u20_100 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+    <td style="background-color: ${colorize(row.sety_300)}">${row.sety_300 || ''}</td>
+    <td style="background-color: ${colorize(row.u17_300)}">${row.u17_300 || ''}</td>
+    <td style="background-color: ${colorize(row.u18_300)}">${row.u18_300 || ''}</td>
+    <td style="background-color: ${colorize(row.u19_300)}">${row.u19_300 || ''}</td>
+    <td style="background-color: ${colorize(row.u20_300)}">${row.u20_300 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+    <td>${row.kurz || ''}</td>
+  </tr>`;
     });
 
     html += '</tbody></table>';
