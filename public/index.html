@@ -315,45 +315,6 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 /* =========================
    4,5 – FILTR
    ========================= */
-document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
-  const output = document.getElementById('output-upcoming');
-  const statusMessages = document.getElementById('statusMessages');
-  output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
-  statusMessages.textContent = ''; // vyčistit případné staré zprávy
-  try {
-    const res = await fetch('/upcoming');
-    if (!res.ok) throw new Error('Chyba serveru');
-    const data = await res.json();
-
-    if (data.messages && data.messages.length > 0) {
-      // zobrazit chybové i úspěšné zprávy přehledně
-      statusMessages.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
-    } else {
-      statusMessages.textContent = 'Žádné zprávy z backendu.';
-    }
-
-    if (data.total) {
-      output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
-    }
-
-  } catch (e) {
-    output.textContent = `Chyba: ${e.message}`;
-  }
-});
-
-    document.getElementById('update-odds-btn').addEventListener('click', async () => {
-      const output = document.getElementById('output-odds');
-      output.textContent = 'Aktualizuji kurzy...';
-      try {
-        const res = await fetch('/update-odds');
-        if (!res.ok) throw new Error('Chyba serveru při update kurzů');
-        const data = await res.json();
-        output.textContent = `Kurzy aktualizovány pro ${data.updatedCount || 'několik'} zápasů.`;
-      } catch (e) {
-        output.textContent = `Chyba: ${e.message}`;
-      }
-    });
-
     document.getElementById('filter-btn').addEventListener('click', async () => {
       const container = document.getElementById('filtered-table');
       container.innerHTML = 'Načítám...';
@@ -376,7 +337,7 @@ document.getElementById('upload-upcoming-btn').addEventListener('click', async (
           return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
         });
         let html = '<table border="1" cellpadding="5"><thead><tr>';
-const headers = ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35_100', '45_100', 'H2H 300', '35_300', '45_100','Kurz', 'Chyb'];
+const headers = ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35_100', '45_100', 'H2H 300', '35_300', '45_100', 'Kurz', 'Chyb'];
 
 headers.forEach(h => {
   if (h === '') {
