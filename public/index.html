@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 3.0</title>
+  <title>TT 3.1</title>
   <style>
     #button-row {
       display: flex;
@@ -136,51 +136,115 @@ const formatDate = d => {
          `${x.getMinutes().toString().padStart(2, '0')}`;
 };
 
-const colorize = v => {
-  if (v === null || v === undefined) return 'transparent';
-  if (v < 1.5) return '#90EE90';
-  if (v > 10) return '#D3D3D3';
-  return 'transparent';
-};
-
 /* =========================
    FILTR 3:0
    ========================= */
 document.getElementById('forehand-filter-btn').addEventListener('click', async () => {
-  const c = document.getElementById('filtered-table');
-  const msg = document.getElementById('statusMessages');
-  c.innerHTML = 'Načítám 3:0...';
-  msg.innerHTML = '';
+  const container = document.getElementById('filtered-table');
+  const messageContainer = document.getElementById('statusMessages');
+  container.innerHTML = 'Načítám data...';
+  messageContainer.innerHTML = '';
+  try {
+    const response = await fetch('/api/filter-3-0');
+    if (!response.ok) throw new Error('Chyba serveru při načítání dat');
+    const data = await response.json();
 
-  const r = await fetch('/api/filter-3-0');
-  const d = await r.json();
+    if (!Array.isArray(data.matches)) {
+      container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+      console.error('Neočekávaná data:', data);
+      return;
+    }
 
-  const filtered = d.matches.filter(m =>
-    new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
-    m.h2h_100 > 8 &&
-    (
-      (m.home_100 > 0 && m.home_100 < 4) ||
-      (m.away_100 > 0 && m.away_100 < 4)
-    )
-  );
+    if (data.messages && data.messages.length > 0) {
+      messageContainer.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+    }
+     // filtr
+        const filter3 = data.matches.filter(m => {
+          const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+          const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16;
+          const cond2 = (m.home_100 < 2 && m.home_100> 0 && m.home_300< 4) || (m.away_100 > 0 && m.away_100< 2 && m.away_300< 4);
+          const cond25 = (m.home_100 < 2.6 && m.home_100> 0 && m.kurz> 1.17 && m.home_300< 4) || (m.away_100 > 0 && m.away_100< 2.6  && m.kurz> 1.17 && m.away_300< 4);
+          const cond3 = (m.home_100 < 3.2 && m.home_100> 0 && m.kurz> 1.37 && m.home_300< 4.3) || (m.away_100 > 0 && m.away_100< 3.2  && m.kurz> 1.37 && m.away_300< 4.3);
+          const cond4 = (m.home_100 < 4 && m.home_100> 0 && m.kurz> 1.58 && m.home_300< 4.6) || (m.away_100 > 0 && m.away_100< 4  && m.kurz> 1.58 && m.away_300< 4.6);
+          const liga = (m.league_name==='TT Elite Series' &&  ((m.home_100< 3 &&  m.home_300< 3.5 &&  m.home_300>1) || (m.away_100< 3 &&  m.away_300< 3.5 && m.away_300>1))) || m.league_name==='Setka Cup'
+          
+          return recentEnough && basicThreshold && (cond2 || cond25 || cond3 || cond4) && liga;
+        });
+   let html = '<table border="1" cellpadding="5"><thead><tr>';
+    const headers = [
+      'Datum a čas', 'Liga', 'Domácí', 'Hosté',
+      'H2H 30', 'H2H 100', 'H2H 300', '','H 30', 'Home 100', 'H 300', '', 'A 30', 'Away 100', 'A 300', '', 'Kurz', 'Min Kurz'
+    ];
+    headers.forEach(h => {
+      if (h === '') {
+       html += `<th style="width: 4px; padding: 0; border-left:4px solid blue;"></th>`;
+      } else {
+        html += `<th>${h}</th>`;
+      }
+    });
+    html += '</tr></thead><tbody>';
 
-  let html = '<table border="1"><tbody>';
-  filtered.forEach(r => {
-    html += `
-      <tr>
-        <td>${formatDate(r.cas)}</td>
-        <td>${r.home_name}</td>
-        <td>${r.away_name}</td>
-        <td>${r.kurz}</td>
-      </tr>`;
-  });
-  html += '</tbody></table>';
+    filter3.forEach(row => {
+  function colorize(value) {
+    if (value === null || value === undefined) return 'transparent';
+    if (value < 2) return '#90ee90';
+    if (value >= 2 && value < 3) return '#b4eeb4';
+    if (value >= 3 && value < 4) return '#d6f5d6';
+    if (value > 6) return '#d3d3d3';
+    return 'transparent';
+  }
+  function formatDateDDMMHHMM(date) {
+  const d = new Date(date);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${day}.${month} ${hours}:${minutes}`;
+}
 
-  c.innerHTML = html;
+  const isH2h30Low = row.h2h_30 < 5;
+
+  html += `<tr>
+    <td>${row.cas ? formatDateDDMMHHMM(row.cas) : ''}</td>
+    <td>${row.league_name || ''}</td>
+    <td>${row.home_name || ''}</td>
+    <td>${row.away_name || ''}</td>
+     <td style="background-color: ${isH2h30Low ? '#FFFFE0' : 'transparent'}">${isH2h30Low ? '---' : (row.h2h_30 || '')}</td>
+    <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+    <td style="background-color: ${row.h2h_300 < 21 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+   <td style="background-color: ${isH2h30Low ? '#FFFFE0' : colorize(row.home_30)}">${isH2h30Low ? '---' : (row.home_30 || '')}</td>
+    <td style="background-color: ${colorize(row.home_100)}">
+  ${row.home_100 !== null && row.home_100 !== undefined ? row.home_100 + ' (' + (row.home_100 * 1.2).toFixed(2) + ')' : ''}
+  </td>
+    <td style="background-color: ${colorize(row.home_300)}">${row.home_300 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+    <td style="background-color: ${isH2h30Low ? '#FFFFE0' : colorize(row.away_30)}">${isH2h30Low ? '---' : (row.away_30 || '')}</td>
+    <td style="background-color: ${colorize(row.away_100)}">
+  ${row.away_100 !== null && row.away_100 !== undefined ? row.away_100 + ' (' + (row.away_100 * 1.2).toFixed(2) + ')' : ''}
+</td>
+    <td style="background-color: ${colorize(row.away_300)}">${row.away_300 || ''}</td>
+    <td style="width: 4px; padding: 0; border-left: 4px solid blue;"></td>
+    <td>${row.kurz || ''}</td>
+    <td style="background-color: ${
+  row.kurz_min_30 > row.kurz ? '#FFC0CB' :         // větší než kurz => růžová
+  row.kurz_min_30 * 1.1 > row.kurz ? '#FFFFE0' :  // větší než kurz*1,1 => světle žlutá
+  row.kurz_min_30 < row.kurz / 1.25 ? '#ADD8E6' :   // menší než kurz/1,3 => světle modrá
+  'transparent'                                    // jinak bez barvy
+}">${row.kurz_min_30 || ''}</td>
+  </tr>`;
+});
+
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (error) {
+    container.innerHTML = `Chyba: ${error.message}`;
+  }
 });
 
 /* =========================
-   SETY – HLAVNÍ FILTR
+   SETY – FILTR
    ========================= */
 document.getElementById('sety-filter-btn').addEventListener('click', async () => {
   const c = document.getElementById('filtered-table');
@@ -249,6 +313,103 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
     c.innerHTML = `Chyba: ${e.message}`;
   }
 });
+/* =========================
+   4,5 – FILTR
+   ========================= */
+document.getElementById('upload-upcoming-btn').addEventListener('click', async () => {
+  const output = document.getElementById('output-upcoming');
+  const statusMessages = document.getElementById('statusMessages');
+  output.textContent = 'Nahraju upcoming zápasy a aktualizuji...';
+  statusMessages.textContent = ''; // vyčistit případné staré zprávy
+  try {
+    const res = await fetch('/upcoming');
+    if (!res.ok) throw new Error('Chyba serveru');
+    const data = await res.json();
+
+    if (data.messages && data.messages.length > 0) {
+      // zobrazit chybové i úspěšné zprávy přehledně
+      statusMessages.innerHTML = data.messages.map(m => `<p>${m}</p>`).join('');
+    } else {
+      statusMessages.textContent = 'Žádné zprávy z backendu.';
+    }
+
+    if (data.total) {
+      output.textContent = `Hotovo. Nadcházející zápasy: ${data.total}`;
+    }
+
+  } catch (e) {
+    output.textContent = `Chyba: ${e.message}`;
+  }
+});
+
+    document.getElementById('update-odds-btn').addEventListener('click', async () => {
+      const output = document.getElementById('output-odds');
+      output.textContent = 'Aktualizuji kurzy...';
+      try {
+        const res = await fetch('/update-odds');
+        if (!res.ok) throw new Error('Chyba serveru při update kurzů');
+        const data = await res.json();
+        output.textContent = `Kurzy aktualizovány pro ${data.updatedCount || 'několik'} zápasů.`;
+      } catch (e) {
+        output.textContent = `Chyba: ${e.message}`;
+      }
+    });
+
+    document.getElementById('filter-btn').addEventListener('click', async () => {
+      const container = document.getElementById('filtered-table');
+      container.innerHTML = 'Načítám...';
+      try {
+        const response = await fetch('/api/filter-upcoming');
+        if (!response.ok) throw new Error('Chyba serveru při načítání zápasů');
+        const allMatches = await response.json();
+        if (!Array.isArray(allMatches)) {
+          container.innerHTML = 'Neočekávaná odpověď ze serveru.';
+          console.error('Neočekávaná data:', allMatches);
+          return;
+        }
+        // stávající filtr, který už máte
+        const filtered = allMatches.filter(m => {
+          const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
+          const basicThreshold = m.h2h_100 > 8 && m.h2h_300 > 16 && m["35_100"] > 0;
+          const cond45a = (m["45_100"] < 1.29 || m["45_300"] < 1.29) && m["45_100"] < 1.4 && m["45_300"] < 1.4;
+          const cond35a = (m["35_100"] < 2.1 || m["35_300"] < 2.1) && m["35_100"] < 3 && m["35_300"] < 3;
+          const negatedCond = !((m["45_100"] > 1.245 && m["45_300"] > 1.295) || (m["45_100"] > 1.29 && m["45_300"] > 1.245)) || m["35_100"] < 2.1 || m["35_300"] < 2.1;
+          return recentEnough && basicThreshold && (cond45a || cond35a) && negatedCond;
+        });
+        let html = '<table border="1" cellpadding="5"><thead><tr>';
+const headers = ['Datum a čas', 'Domácí', 'Hosté', 'H2H 100', '35_100', '45_100', 'H2H 300', '35_300', '45_100','Kurz', 'Chyb'];
+
+headers.forEach(h => {
+  if (h === '') {
+    html += `<th style="border-left: 4px solid blue;"></th>`; // Oddělovač ve hlavičce
+  } else {
+    html += `<th>${h}</th>`;
+  }
+});
+html += '</tr></thead><tbody>';
+
+        filtered.forEach(row => {
+          html += `<tr>
+            <td>${row.cas ? new Date(row.cas).toLocaleString() : ''}</td>
+            <td>${row.home_name || ''}</td>
+            <td>${row.away_name || ''}</td>
+            <td style="background-color: ${row.h2h_100 < 15 ? '#FFC0CB' : 'transparent'}">${row.h2h_100 || ''}</td>
+            <td style="background-color: ${row["35_100"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_100"] || ''}</td>
+            <td style="background-color: ${row["45_100"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_100"] || ''}</td>
+            <td style="background-color: ${row.h2h_300 < 20 ? '#FFC0CB' : 'transparent'}">${row.h2h_300 || ''}</td>
+            <td style="background-color: ${row["35_300"] < 2 ? '#ADD8E6' : 'transparent'}">${row["35_300"] || ''}</td>
+            <td style="background-color: ${row["45_300"] < 1.25 ? '#90EE90' : 'transparent'}">${row["45_300"] || ''}</td>
+            <td style="background-color: ${row.kurz < 1.31 ? '#FFC0CB' : row.kurz > 1.55 ? '#D1F9B3' : 'transparent'}">${row.kurz || ''}</td>
+            <td>${row.chyba_poctu || ''}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (error) {
+        container.innerHTML = `Chyba: ${error.message}`;
+      }
+    });
+  
 </script>
 
   
