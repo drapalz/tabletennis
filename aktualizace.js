@@ -306,7 +306,7 @@ app.get('/api/filter-sety', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('upcoming')
-      .select('home_name, away_name, league_name, cas, h2h_100, ,sety_100,u17_100,u18_100,u19_100,u20_100,sety_300,u17_300,u18_300,u19_300,u20_300, kurz')
+      .select('home_name, away_name, league_name, cas, h2h_100, sety_100,u17_100,u18_100,u19_100,u20_100,sety_300,u17_300,u18_300,u19_300,u20_300, kurz')
       .order('cas', { ascending: true });
     if (error) return res.status(500).json({ error: error.message });
 
