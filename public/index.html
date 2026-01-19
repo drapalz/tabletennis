@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 3.1</title>
+  <title>TT 3.2</title>
   <style>
     #button-row {
       display: flex;
@@ -259,12 +259,12 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 
     const filtered = d.matches.filter(m =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
-      m.h2h_100 > 8 &&
+      m.h2h_100 > 5 &&
       (
-        (m.u17_100 > 0 && m.u17_100 < 10) ||
-        (m.u18_100 > 0 && m.u18_100 < 10) ||
-        (m.u19_100 > 0 && m.u19_100 < 10) ||
-        (m.u20_100 > 0 && m.u20_100 < 10)
+        (m.u17_100 > 0 || m.u17_100 < 10) ||
+        (m.u18_100 > 0 || m.u18_100 < 10) ||
+        (m.u19_100 > 0 || m.u19_100 < 10) ||
+        (m.u20_100 > 0 || m.u20_100 < 10)
       )
     );
 
@@ -290,17 +290,17 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <td>${r.away_name}</td>
           <td>${r.h2h_100}</td>
           <td style="border-left:4px solid blue"></td>
-          <td style="background:${colorize(r.sety_100)}">${r.sety_100}</td>
-          <td style="background:${colorize(r.u17_100)}">${r.u17_100}</td>
-          <td style="background:${colorize(r.u18_100)}">${r.u18_100}</td>
-          <td style="background:${colorize(r.u19_100)}">${r.u19_100}</td>
-          <td style="background:${colorize(r.u20_100)}">${r.u20_100}</td>
+          <td style="background-color: ${r.sety_100 < 15 ? '#FFC0CB' : 'transparent'}">${r.sety_100 || ''}</td>
+          <td style="background-color: ${r.u17_100 > 10 ? '#FFC0CB' : 'transparent'}">${r.u17_100 || ''}</td>
+          <td style="background-color: ${r.u18_100 > 10 ? '#FFC0CB' : 'transparent'}">${r.u18_100 || ''}</td>
+          <td style="background-color: ${r.u19_100 > 10 ? '#FFC0CB' : 'transparent'}">${r.u19_100 || ''}</td>
+          <td style="background-color: ${r.u20_100 > 10 ? '#FFC0CB' : 'transparent'}">${r.u20_100 || ''}</td>
           <td style="border-left:4px solid blue"></td>
-          <td style="background:${colorize(r.sety_300)}">${r.sety_300}</td>
-          <td style="background:${colorize(r.u17_300)}">${r.u17_300}</td>
-          <td style="background:${colorize(r.u18_300)}">${r.u18_300}</td>
-          <td style="background:${colorize(r.u19_300)}">${r.u19_300}</td>
-          <td style="background:${colorize(r.u20_300)}">${r.u20_300}</td>
+          <td style="background-color: ${r.sety_300 < 25 ? '#FFC0CB' : 'transparent'}">${r.sety_300 || ''}</td>
+          <td style="background-color: ${r.u17_300 > 10 ? '#FFC0CB' : 'transparent'}">${r.u17_300 || ''}</td>
+          <td style="background-color: ${r.u18_300 > 10 ? '#FFC0CB' : 'transparent'}">${r.u18_300 || ''}</td>
+          <td style="background-color: ${r.u19_300 > 10 ? '#FFC0CB' : 'transparent'}">${r.u19_300 || ''}</td>
+          <td style="background-color: ${r.u20_300 > 10 ? '#FFC0CB' : 'transparent'}">${r.u20_300 || ''}</td>
           <td style="border-left:4px solid blue"></td>
           <td>${r.kurz}</td>
         </tr>`;
