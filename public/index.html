@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 2.4</title>
+  <title>TT 2.5</title>
   <style>
     #button-row {
       display: flex;
@@ -306,16 +306,26 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
       const recentEnough = new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000);
       // Příklad podmínek - upravte podle potřeby
       const basicThreshold = m.h2h_100 > 8;
-      return recentEnough && basicThreshold;
+      const cond17 = (m.u17_100 < 10 && m.u17_100>10);
+      const cond18 = (m.u18_100 < 10 && m.u18_100>10);
+      const cond19 = (m.u19_100 < 10 && m.u19_100>10);
+      const cond20 = (m.u20_100 < 10 && m.u20_100>10);
+      
+          
+      return recentEnough && basicThreshold && (cond17 || cond18 || cond19 || cond20);
+      
+      
     });
 
     let html = '<table border="1" cellpadding="5"><thead><tr>';
     // Upravte hlavičky podle dat z /api/filter-sety
     const headers = [
-      'Datum a čas', 'Liga', 'Domácí', 'Hosté',
-      'H2H 100', 'H2H 300', '', 'Home 100', 'Home 300', '', 'Away 100', 'Away 300', '', 'Kurz'
-    ];
-
+  'Datum', 'Liga', 'Domácí', 'Hosté',
+  'H2H 100', '', 
+  'Sety 100', 'U17 100', 'U18 100', 'U19 100', 'U20 100', '',
+  'Sety 300', 'U17 300', 'U18 300', 'U19 300', 'U20 300', '',
+  'Kurz'
+];
     headers.forEach(h => {
       if (h === '') {
         html += `<th style="width: 4px; padding: 0; border-left:4px solid blue;"></th>`;
