@@ -261,10 +261,10 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
       m.h2h_100 > 5 &&
       (
-        (m.u17_100 > 0 || m.u17_100 < 10) ||
-        (m.u18_100 > 0 || m.u18_100 < 10) ||
-        (m.u19_100 > 0 || m.u19_100 < 10) ||
-        (m.u20_100 > 0 || m.u20_100 < 10)
+        (m.u17_100 > 10 || m.u17_100 < 4) ||
+        (m.u18_100 > 0 || m.u18_100 < 3) ||
+        (m.u19_100 > 0 || m.u19_100 < 2) ||
+        (m.u20_100 > 0 || m.u20_100 < 1.5)
       )
     );
 
@@ -274,9 +274,9 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <tr>
             <th>Datum</th><th>Liga</th><th>Domácí</th><th>Hosté</th>
             <th>H2H</th><th></th>
-            <th>Sety100</th><th>U17</th><th>U18</th><th>U19</th><th>U20</th>
+            <th>Sety100</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th>
             <th></th>
-            <th>Sety300</th><th>U17</th><th>U18</th><th>U19</th><th>U20</th>
+            <th>Sety300</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th>
             <th></th><th>Kurz</th>
           </tr>
         </thead><tbody>`;
