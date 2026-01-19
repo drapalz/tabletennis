@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 3.6</title>
+  <title>TT 3.8</title>
   <style>
     #button-row {
       display: flex;
@@ -261,12 +261,11 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
       m.h2h_100 > 5 && m.sety_100 > 30 &&
       (
-       m.u17_100 > 12 || m.u17_100 < 2.9 ||
-       m.u18_100 > 6 || m.u18_100 < 2.05 ||
-       m.u19_100 > 2.7 || m.u19_100 < 1.5 ||
-       m.u20_100 > 1.8 || m.u20_100 < 1.15
-      )
-    );
+       (m.u17_100 > 12 && m.u17_300 > 12) || (m.u17_100 < 2.9 && m.u17_300 < 2.9) ||
+       (m.u18_100 > 6 && m.u18_300 > 6) || (m.u18_100 < 2.05 && m.u18_300 < 2.05) ||
+        (m.u19_100 > 2.7 && m.u19_300 > 2.7) || (m.u19_100 < 1.5 && m.u19_300 < 1.5) ||
+        (m.u20_100 > 1.8 && m.u20_300 > 1.8) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) 
+        );
 
     let html = `
       <table border="1" cellpadding="5">
