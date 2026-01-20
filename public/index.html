@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 3.11</title>
+  <title>TT 4.0</title>
   <style>
     #button-row {
       display: flex;
@@ -25,7 +25,7 @@
   </style>
 </head>
 <body>
-  <h1>TT 3:0</h1>
+  <h1>TT</h1>
   <div id="button-row">
     <button id="upload-ended-btn">Nahrej do ended</button>
     <button id="upload-upcoming-btn">Nahraj do upcoming</button>
@@ -259,7 +259,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 
     const filtered = d.matches.filter(m =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
-      m.h2h_100 > 5 && m.sety_100 > 30 &&
+      m.h2h_100 > 5 && m.sety_100 > 50 &&
       (
        (m.u17_100 > 12 && m.u17_300 > 12) || (m.u17_100 < 2.9 && m.u17_300 < 2.9) ||
        (m.u18_100 > 6 && m.u18_300 > 6) || (m.u18_100 < 2.05 && m.u18_300 < 2.05) ||
