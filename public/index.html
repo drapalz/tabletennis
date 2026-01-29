@@ -330,7 +330,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 </td>
 
           <td style="border-left:4px solid blue"></td>
-          <td>${r.kurz}</td>
+          <td style="background-color: ${r.kurz < 1.21 ? '#FFC0CB' : 'transparent'}">${r.kurz || ''}</td>
         </tr>`;
     });
 
