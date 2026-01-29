@@ -264,7 +264,8 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
        (m.u17_100 > 12 && m.u17_300 > 12) || (m.u17_100 < 2.9 && m.u17_300 < 2.9) ||
        (m.u18_100 > 6 && m.u18_300 > 6) || (m.u18_100 < 2.05 && m.u18_300 < 2.05) ||
         (m.u19_100 > 2.9 && m.u19_300 > 2.9) || (m.u19_100 < 1.5 && m.u19_300 < 1.5) ||
-        (m.u20_100 > 1.85 && m.u20_300 > 1.85) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) 
+        (m.u20_100 > 1.85 && m.u20_300 > 1.85) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) ||
+         (m.u21_100 > 1.25 && m.u21_300 > 1.25)
         )
         );
 
@@ -274,9 +275,9 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <tr>
             <th>Datum</th><th>Liga</th><th>Domácí</th><th>Hosté</th>
             <th>H2H</th><th></th>
-            <th>Sety100</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th>
+            <th>Sety100</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th><th>U20_5</th>
             <th></th>
-            <th>Sety300</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th>
+            <th>Sety300</th><th>U16_5</th><th>U17_5</th><th>U18_5</th><th>U19_5</th><th>U20_5</th>
             <th></th><th>Kurz</th>
           </tr>
         </thead><tbody>`;
@@ -307,6 +308,10 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u20_100 ?? ''}
   ${r.u20_100 > 1 ? ` (${(r.u20_100 / (r.u20_100 - 1)).toFixed(2)})` : ''}
 </td>
+<td style="background-color: ${r.u21_100 < 1.05 ? '#90EE90' : r.u21_100 > 1.25 ? '#FFC0CB' : 'transparent'}">
+  ${r.u21_100 ?? ''}
+  ${r.u21_100 > 1 ? ` (${(r.u21_100 / (r.u21_100 - 1)).toFixed(2)})` : ''}
+</td>
 <td style="border-left:4px solid blue"></td>
 <td style="background-color: ${r.sety_300 < 15 ? '#FFC0CB' : 'transparent'}">${r.sety_300 || ''}</td>
 <td style="background-color: ${r.u17_300 < 2.9 ? '#90EE90' : r.u17_300 > 12 ? '#FFC0CB' : 'transparent'}">
@@ -323,12 +328,14 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u19_300 ?? ''}
   ${r.u19_300 > 1 ? ` (${(r.u19_300 / (r.u19_300 - 1)).toFixed(2)})` : ''}
 </td>
-
 <td style="background-color: ${r.u20_300 < 1.15 ? '#90EE90' : r.u20_300 > 1.8 ? '#FFC0CB' : 'transparent'}">
   ${r.u20_300 ?? ''}
   ${r.u20_300 > 1 ? ` (${(r.u20_300 / (r.u20_300 - 1)).toFixed(2)})` : ''}
 </td>
-
+<td style="background-color: ${r.u21_300 < 1.05 ? '#90EE90' : r.u21_300 > 1.25 ? '#FFC0CB' : 'transparent'}">
+  ${r.u21_300 ?? ''}
+  ${r.u21_300 > 1 ? ` (${(r.u21_300 / (r.u21_300 - 1)).toFixed(2)})` : ''}
+</td>
           <td style="border-left:4px solid blue"></td>
           <td style="background-color: ${r.kurz < 1.21 ? '#FFC0CB' : 'transparent'}">${r.kurz || ''}</td>
         </tr>`;
