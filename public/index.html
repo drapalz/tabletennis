@@ -263,7 +263,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
       (
        (m.u17_100 > 12 && m.u17_300 > 12) || (m.u17_100 < 2.9 && m.u17_300 < 2.9) ||
        (m.u18_100 > 6 && m.u18_300 > 6) || (m.u18_100 < 2.05 && m.u18_300 < 2.05) ||
-        (m.u19_100 > 2.99 && m.u19_300 > 2.99) || (m.u19_100 < 1.5 && m.u19_300 < 1.5) ||
+        (m.u19_100 > 2.95 && m.u19_300 > 2.95) || (m.u19_100 < 1.52 && m.u19_300 < 1.52) ||
         (m.u20_100 > 1.83 && m.u20_300 > 1.83) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) ||
          (m.u21_100 > 1.32 && m.u21_300 > 1.32)
         )
@@ -300,7 +300,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u18_100 ?? ''}
   ${r.u18_100 > 1 ? ` (${(r.u18_100 / (r.u18_100 - 1)).toFixed(2)})` : ''}
 </td>
-<td style="background-color: ${r.u19_100 < 1.5 ? '#90EE90' : r.u19_100 > 2.7 ? '#FFC0CB' : 'transparent'}">
+<td style="background-color: ${r.u19_100 < 1.52 ? '#90EE90' : r.u19_100 > 2.95 ? '#FFC0CB' : 'transparent'}">
   ${r.u19_100 ?? ''}
   ${r.u19_100 > 1 ? ` (${(r.u19_100 / (r.u19_100 - 1)).toFixed(2)})` : ''}
 </td>
@@ -324,7 +324,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u18_300 > 1 ? ` (${(r.u18_300 / (r.u18_300 - 1)).toFixed(2)})` : ''}
 </td>
 
-<td style="background-color: ${r.u19_300 < 1.5 ? '#90EE90' : r.u19_300 > 2.72 ? '#FFC0CB' : 'transparent'}">
+<td style="background-color: ${r.u19_300 < 1.52 ? '#90EE90' : r.u19_300 > 2.95 ? '#FFC0CB' : 'transparent'}">
   ${r.u19_300 ?? ''}
   ${r.u19_300 > 1 ? ` (${(r.u19_300 / (r.u19_300 - 1)).toFixed(2)})` : ''}
 </td>
