@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 4.5</title>
+  <title>TT 4.6</title>
   <style>
     #button-row {
       display: flex;
@@ -261,7 +261,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
       m.h2h_100 > 2 && m.sety_300 > 58 &&
       (
-        (m.u19_100 > 2.74 && m.u19_300 > 2.74) || (m.u19_100 < 1.57 && m.u19_300 < 1.57) ||
+        (m.u19_100 > 2.55 && m.u19_300 > 2.55) || (m.u19_100 < 1.57 && m.u19_300 < 1.57) ||
         (m.u20_100 > 1.85 && m.u20_300 > 1.85) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) ||
          (m.u21_100 > 1.35 && m.u21_300 > 1.35)
         )
@@ -290,7 +290,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <td>${r.h2h_100}</td>
           <td style="border-left:4px solid blue"></td>
 <td style="background-color: ${r.sety_100 < 15 ? '#FFC0CB' : 'transparent'}">${r.sety_100 || ''}</td>        
-<td style="background-color: ${r.u19_100 < 1.57 ? '#90EE90' : r.u19_100 > 2.74 ? '#FFC0CB' : 'transparent'}">
+<td style="background-color: ${r.u19_100 < 1.57 ? '#90EE90' : r.u19_100 > 2.55 ? '#FFC0CB' : 'transparent'}">
   ${r.u19_100 ?? ''}
   ${r.u19_100 > 1 ? ` (${(r.u19_100 / (r.u19_100 - 1)).toFixed(2)})` : ''}
 </td>
@@ -304,7 +304,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 </td>
 <td style="border-left:4px solid blue"></td>
 <td style="background-color: ${r.sety_300 < 15 ? '#FFC0CB' : 'transparent'}">${r.sety_300 || ''}</td>
-<td style="background-color: ${r.u19_300 < 1.57 ? '#90EE90' : r.u19_300 > 2.74 ? '#FFC0CB' : 'transparent'}">
+<td style="background-color: ${r.u19_300 < 1.57 ? '#90EE90' : r.u19_300 > 2.55 ? '#FFC0CB' : 'transparent'}">
   ${r.u19_300 ?? ''}
   ${r.u19_300 > 1 ? ` (${(r.u19_300 / (r.u19_300 - 1)).toFixed(2)})` : ''}
 </td>
