@@ -260,10 +260,7 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
     const filtered = d.matches.filter(m =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
       m.h2h_100 > 2 && m.sety_300 > 58 &&
-      (
-        (m.u19_100 > 2.55 && m.u19_300 > 2.55) || (m.u19_100 < 1.6 && m.u19_300 < 1.6) ||
-        (m.u20_100 > 1.85 && m.u20_300 > 1.85) || (m.u20_100 < 1.15 && m.u20_300 < 1.15) 
-        )
+      (m.u19_100 > 2.55 && m.u19_300 > 2.55)
         );
 
     let html = `
