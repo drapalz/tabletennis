@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>TT 4.7</title>
+  <title>TT 5.8</title>
   <style>
     #button-row {
       display: flex;
@@ -259,8 +259,8 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
 
     const filtered = d.matches.filter(m =>
       new Date(m.cas) > new Date(Date.now() - 15 * 60 * 1000) &&
-       m.sety_300 > 50 &&
-      (m.u19_100 > 2.2 && m.u19_300 > 2.55)
+       m.sety_300 > 40 &&
+      (m.u18_300 > 4.35 || m.u19_300 > 2.55)
         );
 
     let html = `
@@ -269,9 +269,9 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <tr>
             <th>Datum</th><th>Liga</th><th>Domácí</th><th>Hosté</th>
             <th>H2H</th><th></th>
-            <th>Sety100</th><th>U18_5</th><th>U19_5</th>
+            <th>Sety100</th><th>U18_5</th><th>U17_5</th>
             <th></th>
-            <th>Sety300</th><th>U18_5</th><th>U19_5</th>
+            <th>Sety300</th><th>U18_5</th><th>U17_5</th>
             <th></th><th>Kurz</th>
           </tr>
         </thead><tbody>`;
@@ -290,9 +290,9 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u19_100 ?? ''}
   ${r.u19_100 > 1 ? ` (${(r.u19_100 / (r.u19_100 - 1)).toFixed(2)})` : ''}
 </td>
-<td style="background-color: ${r.u20_100 < 1.15 ? '#90EE90' : r.u20_100 > 1.85 ? '#FFC0CB' : 'transparent'}">
-  ${r.u20_100 ?? ''}
-  ${r.u20_100 > 1 ? ` (${(r.u20_100 / (r.u20_100 - 1)).toFixed(2)})` : ''}
+<td style="background-color: ${r.u18_100 < 1.15 ? '#90EE90' : r.u18_100 > 4 ? '#FFC0CB' : 'transparent'}">
+  ${r.u18_100 ?? ''}
+  ${r.u18_100 > 1 ? ` (${(r.u18_100 / (r.u18_100 - 1)).toFixed(2)})` : ''}
 </td>
 
 <td style="border-left:4px solid blue"></td>
@@ -301,9 +301,9 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
   ${r.u19_300 ?? ''}
   ${r.u19_300 > 1 ? ` (${(r.u19_300 / (r.u19_300 - 1)).toFixed(2)})` : ''}
 </td>
-<td style="background-color: ${r.u20_300 < 1.15 ? '#90EE90' : r.u20_300 > 1.85 ? '#FFC0CB' : 'transparent'}">
-  ${r.u20_300 ?? ''}
-  ${r.u20_300 > 1 ? ` (${(r.u20_300 / (r.u20_300 - 1)).toFixed(2)})` : ''}
+<td style="background-color: ${r.u18_300 < 1.15 ? '#90EE90' : r.u18_300 > 4.35 ? '#FFC0CB' : 'transparent'}">
+  ${r.u18_300 ?? ''}
+  ${r.u18_300 > 1 ? ` (${(r.u18_300 / (r.u18_300 - 1)).toFixed(2)})` : ''}
 </td>
 
           <td style="border-left:4px solid blue"></td>
