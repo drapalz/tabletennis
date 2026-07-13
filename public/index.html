@@ -286,22 +286,22 @@ document.getElementById('sety-filter-btn').addEventListener('click', async () =>
           <td>${r.h2h_100}</td>
           <td style="border-left:4px solid blue"></td>
 <td style="background-color: ${r.sety_100 < 15 ? '#FFC0CB' : 'transparent'}">${r.sety_100 || ''}</td>        
-<td style="background-color: ${r.u19_100 < 1.6 ? '#90EE90' : r.u19_100 > 2.55 ? '#90EE90' : 'transparent'}">
+<td style="background-color: ${r.u19_100 < 1.6 ? '#90EE90' : r.u19_100 > 2.62 ? '#90EE90' : 'transparent'}">
   ${r.u19_100 ?? ''}
   ${r.u19_100 > 1 ? ` (${(r.u19_100 / (r.u19_100 - 1)).toFixed(2)})` : ''}
 </td>
-<td style="background-color: ${r.u18_100 < 1.15 ? '#90EE90' : r.u18_100 > 4 ? '#b3ffff' : 'transparent'}">
+<td style="background-color: ${r.u18_100 < 1.15 ? '#90EE90' : r.u18_100 > 4.5 ? '#b3ffff' : 'transparent'}">
   ${r.u18_100 ?? ''}
   ${r.u18_100 > 1 ? ` (${(r.u18_100 / (r.u18_100 - 1)).toFixed(2)})` : ''}
 </td>
 
 <td style="border-left:4px solid blue"></td>
 <td style="background-color: ${r.sety_300 < 50 ? '#FFC0CB' : 'transparent'}">${r.sety_300 || ''}</td>
-<td style="background-color: ${r.u19_300 < 1.57 ? '#90EE90' : r.u19_300 > 2.55 ? '#90EE90' : 'transparent'}">
+<td style="background-color: ${r.u19_300 < 1.57 ? '#90EE90' : r.u19_300 > 2.62 ? '#90EE90' : 'transparent'}">
   ${r.u19_300 ?? ''}
   ${r.u19_300 > 1 ? ` (${(r.u19_300 / (r.u19_300 - 1)).toFixed(2)})` : ''}
 </td>
-<td style="background-color: ${r.u18_300 < 1.15 ? '#90EE90' : r.u18_300 > 4.35 ? '#b3ffff' : 'transparent'}">
+<td style="background-color: ${r.u18_300 < 1.15 ? '#90EE90' : r.u18_300 > 4.5 ? '#b3ffff' : 'transparent'}">
   ${r.u18_300 ?? ''}
   ${r.u18_300 > 1 ? ` (${(r.u18_300 / (r.u18_300 - 1)).toFixed(2)})` : ''}
 </td>
