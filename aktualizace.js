@@ -13,6 +13,8 @@ const TOKEN = '223543-zHPMwtDqu7Sduj';
 const SPORT_ID = 92;
 const LEAGUE_ID = 29128;
 const LEAGUE_IDS = [22307, 29128];
+const TIME_OFFSET_HOURS = 1; // zimní čas
+// const TIME_OFFSET_HOURS = 2; // letní čas
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
@@ -101,7 +103,7 @@ async function upsertMatchesToUpcomingDb(matches) {
     let casWithOffset = null;
     if (cas) {
       const d = new Date(cas);
-      d.setHours(d.getHours() + 2);
+      d.setHours(d.getHours() + TIME_OFFSET_HOURS);
       casWithOffset = d.toISOString();
     }
     return {
